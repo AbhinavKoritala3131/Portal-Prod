@@ -16,18 +16,15 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(UserExists.class)
+    public ResponseEntity<Map<String, Object>> handleUserExistsExceptions(UserExists ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Bad Request");
+        response.put("message", ex.getMessage());
 
-        Map<String, String> fieldErrors = new HashMap<>();
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
-        response.put("errors", fieldErrors);
+
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

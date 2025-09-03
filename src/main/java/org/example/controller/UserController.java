@@ -1,6 +1,8 @@
 package org.example.controller;
 
+import org.example.entity.Login;
 import org.example.entity.User;
+import org.example.exception.UserExists;
 import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +32,29 @@ public class UserController {
 //    }
 //    GetById , DeleteById
 
-    @PostMapping("/create")
-    public ResponseEntity<Map<String,String>> createUser(@Valid  @RequestBody User user) {
-        if (user.getId() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Do not send ID while creating User");
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> createUser(@Valid  @RequestBody User user) {
+        if(userRepository.existsByEmail(user.getEmail()) || userRepository.existsBySsn(user.getSsn())
+        || userRepository.existsByMobile(user.getMobile())){
+            throw new UserExists("User already exists, Please Sign-In");
         }
-        User registeredUser = userService.registerUser(user);
-        Map<String, String> response = new HashMap<>();
-        response.put("firstName", registeredUser.getFname());
+        User reg = userService.registerUser(user);
+        Map<String,String> response = new HashMap<>();
+        response.put("message","You are all set "+reg.getFname()+ " Please go ahead and Sign-In");
 
-        return ResponseEntity.status(201).body(response);
 
-    }
+
+
+        return ResponseEntity.status(201).body(response); }
+
+
+//
+//    @PostMapping("/login")
+//    public ResponseEntity<Map<String,String>> signIn(@Valid @RequestBody Login login){
+//
+//        return ResponseEntity.status(200).body(userService.login(login));
+//
+//    }
 
 //    }
 //    @PutMapping("/update/{id}")
