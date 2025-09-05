@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")  // allow your frontend URL
+@CrossOrigin(origins = "http://localhost:5173")  // allow your frontend URL
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -41,20 +41,20 @@ public class UserController {
         User reg = userService.registerUser(user);
         Map<String,String> response = new HashMap<>();
         response.put("message","You are all set "+reg.getFname()+ " Please go ahead and Sign-In");
+        return ResponseEntity.status(200).body(response); }
 
 
 
+    @PostMapping("/login")
+    public ResponseEntity<Map<String,Object>> signIn(@Valid @RequestBody Login login){
 
-        return ResponseEntity.status(201).body(response); }
+        return ResponseEntity.status(200).body(userService.login(login));
 
-
-//
-//    @PostMapping("/login")
-//    public ResponseEntity<Map<String,String>> signIn(@Valid @RequestBody Login login){
-//
-//        return ResponseEntity.status(200).body(userService.login(login));
-//
-//    }
+    }
+    @GetMapping("/fetch/{id}")
+    public ResponseEntity<Map<String,Object>> userDetails(@PathVariable Long id){
+        return ResponseEntity.status(200).body(userService.getUser(id));
+    }
 
 //    }
 //    @PutMapping("/update/{id}")
