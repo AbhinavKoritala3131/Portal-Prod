@@ -33,7 +33,7 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
         user.updatedName(user.getFname(), user.getLname());
-        String Maskedssn= "***-**"+user.getSsn();
+        String Maskedssn= "***-**-"+user.getSsn().substring(5);
         user.setSsn(Maskedssn);
 
 
