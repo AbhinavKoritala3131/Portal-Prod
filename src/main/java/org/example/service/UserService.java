@@ -8,6 +8,7 @@ import org.example.entity.User;
 import org.example.exception.InvalidCredentialsException;
 import org.example.exception.UserNotFound;
 import org.example.repository.UserRepository;
+import org.example.security.SSNEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +34,14 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
         user.updatedName(user.getFname(), user.getLname());
-        String Maskedssn= "***-**-"+user.getSsn().substring(5);
-        user.setSsn(Maskedssn);
+
+        try {
+            String encryptedSSN=SSNEncryptor.encrypt(user.getSsn());
+            user.setSsn(encryptedSSN); // Before saving to DB
+            // TO DECRYPT : String decryptedSsn = SSNEncryptor.decrypt(user.getSsn()); // Only for authorized roles
+        }catch(Exception re){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid SSN");
+        }
 
 
         return userRepository.save(user);
