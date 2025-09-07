@@ -1,71 +1,88 @@
 package org.example.service;
+import jakarta.persistence.EntityManager;
 import org.example.dto.TimesheetDTO;
 import org.example.entity.User;
 
 import org.example.entity.Timesheet;
 import org.example.repository.TimesheetRepository;
-import org.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.data.repository.util.ClassUtils.ifPresent;
 
 @Service
 public class TimesheetService {
     @Autowired
     private TimesheetRepository timesheetRepository;
     @Autowired
-    private UserRepository userRepository;
-    // Upsert logic: find existing by userId + date, update if exists, else create new
-    public Timesheet upsertTimesheet(Long userId, LocalDate date, TimesheetDTO dto) {
-        Optional<Timesheet> existingOpt = timesheetRepository.findByUserIdAndDate(userId, date);
+    private EntityManager em;
+    public void upsertTimesheet(TimesheetDTO dto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        Optional<Timesheet> r= timesheetRepository.findByUser_IdAndDate(dto.getUserId(), dto.getDate());
+        r.ifPresentOrElse(t -> { if(!dto.getStart().
+                        equals(t.getStart())){t.setStart(dto.getStart());}
+        else if(!dto.getEnd().equals(t.getEnd())){
+            t.setEnd(dto.getEnd());
+                }
+                    else {
+//                            Do Nothing
+                }
+            timesheetRepository.save(t);},
 
-        Timesheet ts;
-        if (existingOpt.isPresent()) {
-            ts = existingOpt.get();
-            // Update fields
-            ts.setStart(dto.getStart());
-            ts.setEnd(dto.getEnd());
-            ts.setTotal(dto.getTotal());
-            ts.setProject(dto.getProject());
-            ts.setWeek(dto.getWeek());
-            // User and Date do not change
-        } else {
-            ts = new Timesheet();
-            ts.setUser(user);
-            ts.setDate(date);
-            ts.setStart(dto.getStart());
-            ts.setEnd(dto.getEnd());
-            ts.setTotal(dto.getTotal());
-            ts.setProject(dto.getProject());
-            ts.setWeek(dto.getWeek());
+                ()->{ Timesheet ts= new Timesheet();
+                        ts.setDate(dto.getDate());
+                        ts.setWeek(dto.getWeek());
+                        ts.setProject(dto.getProject());
+                        ts.setTotal(dto.getTotal());
+                        ts.setEnd(dto.getEnd());
+                        ts.setStart(dto.getStart());
+                        User u =em.getReference(User.class, dto.getUserId());
+                        ts.setUser(u);
+                        timesheetRepository.save(ts);
         }
-        return timesheetRepository.save(ts);
+                );
+
+
+
+
+
+
+
+
+
+
     }
+
 }
 
-//    public void submitTS(TimesheetDTO dto){
+    // Upsert logic: find existing by userId + date, update if exists, else create new
+//    public Timesheet upsertTimesheet(Long userId, LocalDate date, TimesheetDTO dto) {
+//        Optional<Timesheet> existingOpt = timesheetRepository.findByUserIdAndDate(userId, date);
 //
-//            Timesheet ts = new Timesheet();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 //
-//
-//       ts.setStart(dto.getStart());
-//         ts.setEnd(dto.getEnd());
-//         ts.setTotal(dto.getTotal());
-//        ts.setWeek(dto.getWeek());
-//         ts.setProject(dto.getProject());
-//
-//        timesheetRepository.save(ts);
-//
-//            }
-
-
+//        Timesheet ts;
+//        if (existingOpt.isPresent()) {
+//            ts = existingOpt.get();
+//            // Update fields
+//            ts.setStart(dto.getStart());
+//            ts.setEnd(dto.getEnd());
+//            ts.setTotal(dto.getTotal());
+//            ts.setProject(dto.getProject());
+//            ts.setWeek(dto.getWeek());
+//            // User and Date do not change
+//        } else {
+//            ts = new Timesheet();
+//            ts.setUser(user);
+//            ts.setDate(date);
+//            ts.setStart(dto.getStart());
+//            ts.setEnd(dto.getEnd());
+//            ts.setTotal(dto.getTotal());
+//            ts.setProject(dto.getProject());
+//            ts.setWeek(dto.getWeek());
+//        }
+//        return timesheetRepository.save(ts);
+//    }
+//}
 

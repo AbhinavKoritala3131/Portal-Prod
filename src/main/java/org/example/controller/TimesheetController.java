@@ -25,9 +25,11 @@ public class TimesheetController {
 
     @PostMapping("/submit")
     public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO dto) {
-        LocalDate date = LocalDate.parse(dto.getDate().toString());
-        Timesheet ts = timesheetService.upsertTimesheet(dto.getUserId(), date, dto);
-        return ResponseEntity.ok(ts);
+//        LocalDate date = LocalDate.parse(dto.getDate().toString());
+//        Timesheet ts = timesheetService.upsertTimesheet(dto.getUserId(), date, dto);
+        timesheetService.upsertTimesheet(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
 
