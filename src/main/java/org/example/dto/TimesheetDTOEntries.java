@@ -1,44 +1,46 @@
 package org.example.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 
 public class TimesheetDTOEntries {
         private Long UserId;
-        private String date;
-        private String start;
-
-        private String end;
-        private String total;
+        private LocalDate date;
+        private LocalTime start;
+        private LocalTime end;
+        private Double total;
         private String project;
         private String week;
 
-    public String getTotal() {
+    public Double getTotal() {
         return total;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 
@@ -50,7 +52,7 @@ public class TimesheetDTOEntries {
         UserId = userId;
     }
 
-    public void setTotal(String total) {
+    public void setTotal(Double total) {
         this.total = total;
     }
 

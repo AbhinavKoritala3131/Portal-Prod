@@ -1,18 +1,22 @@
 package org.example.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Duration;
+
 public class ClockDTO {
     private Long userId;
-    private String date;
-    public String start;
-    public String end;
-    public String Total;
+    private LocalDate date;
+    public LocalTime start;
+    public LocalTime end;
+    public Duration Total;
     public String status;
 
-    public String getTotal() {
+    public Duration getTotal() {
         return Total;
     }
 
-    public void setTotal(String total) {
+    public void setTotal(Duration total) {
         Total = total;
     }
 
@@ -24,27 +28,27 @@ public class ClockDTO {
         this.userId = userId;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

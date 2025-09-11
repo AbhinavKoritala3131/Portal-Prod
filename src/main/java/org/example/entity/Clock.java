@@ -1,6 +1,11 @@
 package org.example.entity;
 
 import jakarta.persistence.*;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "clock")
 
@@ -9,21 +14,21 @@ public class Clock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long s_no;
     @Column(name="clockIn")
-    private String start;
+    private LocalTime start;
     @Column(name="clockOut")
-    private String end;
+    private LocalTime  end;
     @Column(name="log_date")
-    private String date;
+    private LocalDate date;
     private String shiftTotal;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="Emp_ID")
     private User user;
 
-    public String getShiftTotal() {
+    public String  getShiftTotal() {
         return shiftTotal;
     }
 
-    public void setShiftTotal(String shiftTotal) {
+    public void setShiftTotal(String  shiftTotal) {
         this.shiftTotal = shiftTotal;
     }
 
@@ -35,27 +40,27 @@ public class Clock {
         this.s_no = s_no;
     }
 
-    public String getStart() {
+    public LocalTime  getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime  start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime  getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime  end) {
         this.end = end;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

@@ -16,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +50,8 @@ public class TimesheetService {
                 temp.setDate(entry.getDate());
                 temp.setEnd(entry.getEnd());
                 temp.setStart(entry.getStart());
-                Timesheet timesheet = timesheetRepository.save(temp);
+//                 Timesheet timesheet =
+                timesheetRepository.save(temp);
 
             }
             Long emp = records.get(0).getUserId();
@@ -55,15 +59,32 @@ public class TimesheetService {
             if("CURRENT".equals(weekGiven)){
              statusRepository.findById(emp)
                     .map(w->{w.setCurrentWeek("SUBMITTED");
-                        w.setCurrentTotal(dto.getWeekTotal());
+                        double decimalHours = dto.getWeekTotal();
+                        long totalSeconds = (long) (decimalHours * 3600);
+                        long hours = totalSeconds / 3600;
+                        long minutes = (totalSeconds % 3600) / 60;
+                        long seconds = totalSeconds % 60;
+                        String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                        w.setCurrentTotal(formatted);
                        return statusRepository.save(w);});
 
 
             }else if("PREVIOUS".equals(weekGiven)){
                 statusRepository.findById(emp)
-                        .map(p->{p.setPreviousWeek("SUBMITTED");
-                            p.setPreviousTotal(dto.getWeekTotal());
-                              return statusRepository.save(p);});
+                        .map(p -> {
+                            p.setPreviousWeek("SUBMITTED");
+
+                            double decimalHours = dto.getWeekTotal();
+                            long totalSeconds = (long) (decimalHours * 3600);
+                            long hours = totalSeconds / 3600;
+                            long minutes = (totalSeconds % 3600) / 60;
+                            long seconds = totalSeconds % 60;
+                            String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                            p.setPreviousTotal(formatted);
+
+                            return statusRepository.save(p);
+                        });
+
 
             }}
          else {
@@ -90,21 +111,34 @@ public class TimesheetService {
 
         }
         else {
-            Optional<Clock> record = clockRepository.
-                    findLastOpenClockByUserAndDate(u.getId(), dto.getDate());
+            Optional<Clock> record = clockRepository.findLastOpenClockByUserAndDate(u.getId(), dto.getDate());
+
             if (record.isPresent()) {
                 Clock c = record.get();
-                String st=c.getStart();
-                c.setEnd(dto.getEnd());
-//                c.setShiftTotal();
+
+                LocalTime start = c.getStart();
+                LocalTime end = dto.getEnd(); // use directly if it's LocalTime
+
+                c.setEnd(end);
+
+                // Calculate and set the shift total as Duration
+                Duration shiftDuration = Duration.between(start, end);
+                long seconds = shiftDuration.getSeconds();
+
+                long hours = seconds / 3600;
+                long minutes = (seconds % 3600) / 60;
+                long secs = seconds % 60;
+
+                String formatted = String.format("%02d:%02d:%02d", hours, minutes, secs);
+                c.setShiftTotal(formatted);
+
+
                 clockRepository.save(c);
                 UpdateStatus(u, dto.getStatus());
-
-
             }
 
-
         }
+
 
 
     }

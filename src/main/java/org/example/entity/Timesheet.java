@@ -3,6 +3,7 @@ package org.example.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
@@ -15,18 +16,18 @@ public class Timesheet {
     private Long s_no;
 //    @Column(name = "UserId")
 //    private Long user_id;
-    private String date;
+    private LocalDate date;
     @Column(name = "StartTime")
-    private String start;
+    private LocalTime start;
     private String week;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="Emp_No")
     @JsonIgnore
     private User user;
 
-    private String total;
+    private double total;
     @Column(name = "EndTime")
-    private String end;
+    private LocalTime end;
     @Column(name="Project")
     private String project;
 
@@ -38,11 +39,11 @@ public class Timesheet {
         this.week = week;
     }
 
-    public String getTotal() {
+    public double getTotal() {
         return total;
     }
 
-    public void setTotal(String total) {
+    public void setTotal(double total) {
         this.total = total;
     }
 
@@ -64,27 +65,27 @@ public class Timesheet {
         this.user = user;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getStart() {
+    public LocalTime getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(LocalTime start) {
         this.start = start;
     }
 
-    public String getEnd() {
+    public LocalTime getEnd() {
         return end;
     }
 
-    public void setEnd(String end) {
+    public void setEnd(LocalTime end) {
         this.end = end;
     }
 

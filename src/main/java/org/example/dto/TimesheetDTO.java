@@ -1,10 +1,11 @@
 package org.example.dto;
 
+import java.time.Duration;
 import java.util.List;
 
 public class TimesheetDTO {
     private String week;
-    private String weekTotal;
+    private double weekTotal;
     private String weekType;
     private List<TimesheetDTOEntries> entries;
 
@@ -16,11 +17,11 @@ public class TimesheetDTO {
         this.weekType = weekType;
     }
 
-    public String getWeekTotal() {
+    public double getWeekTotal() {
         return weekTotal;
     }
 
-    public void setWeekTotal(String weekTotal) {
+    public void setWeekTotal(double weekTotal) {
         this.weekTotal = weekTotal;
     }
 

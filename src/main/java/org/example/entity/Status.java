@@ -2,6 +2,8 @@ package org.example.entity;
 
 import jakarta.persistence.*;
 
+import java.time.Duration;
+
 @Entity
 public class Status {
     @Id
