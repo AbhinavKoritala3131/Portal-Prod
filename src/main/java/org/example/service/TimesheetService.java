@@ -1,13 +1,22 @@
 package org.example.service;
 import jakarta.persistence.EntityManager;
+import org.example.dto.ClockDTO;
 import org.example.dto.TimesheetDTO;
+import org.example.dto.TimesheetDTOEntries;
+import org.example.entity.Clock;
+import org.example.entity.Status;
 import org.example.entity.User;
-
 import org.example.entity.Timesheet;
+import org.example.exception.UserNotFound;
+import org.example.repository.ClockRepository;
+import org.example.repository.StatusRepository;
 import org.example.repository.TimesheetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,73 +25,137 @@ public class TimesheetService {
     private TimesheetRepository timesheetRepository;
     @Autowired
     private EntityManager em;
-    public void upsertTimesheet(TimesheetDTO dto) {
+    @Autowired
+    private ClockRepository clockRepository;
+    @Autowired
+    private StatusRepository statusRepository;
 
-        Optional<Timesheet> r= timesheetRepository.findByUser_IdAndDate(dto.getUserId(), dto.getDate());
-        r.ifPresentOrElse(t -> { if(!dto.getStart().
-                        equals(t.getStart())){t.setStart(dto.getStart());}
-        else if(!dto.getEnd().equals(t.getEnd())){
-            t.setEnd(dto.getEnd());
-                }
-                    else {
-//                            Do Nothing
-                }
-            timesheetRepository.save(t);},
 
-                ()->{ Timesheet ts= new Timesheet();
-                        ts.setDate(dto.getDate());
-                        ts.setWeek(dto.getWeek());
-                        ts.setProject(dto.getProject());
-                        ts.setTotal(dto.getTotal());
-                        ts.setEnd(dto.getEnd());
-                        ts.setStart(dto.getStart());
-                        User u =em.getReference(User.class, dto.getUserId());
-                        ts.setUser(u);
-                        timesheetRepository.save(ts);
+    public ResponseEntity<Void> submitApproval(TimesheetDTO dto) {
+
+
+        List<TimesheetDTOEntries> records = dto.getEntries();
+        if (records != null && !records.isEmpty()) {
+            for (TimesheetDTOEntries entry : records) {
+                User u = em.getReference(User.class, entry.getUserId());
+
+                Timesheet temp = new Timesheet();
+                temp.setUser(u);
+                temp.setProject(entry.getProject());
+                temp.setWeek(entry.getWeek());
+                temp.setTotal(entry.getTotal());
+                temp.setDate(entry.getDate());
+                temp.setEnd(entry.getEnd());
+                temp.setStart(entry.getStart());
+                Timesheet timesheet = timesheetRepository.save(temp);
+
+            }
+            Long emp = records.get(0).getUserId();
+            String weekGiven=dto.getWeekType();
+            if("CURRENT".equals(weekGiven)){
+             statusRepository.findById(emp)
+                    .map(w->{w.setCurrentWeek("SUBMITTED");
+                        w.setCurrentTotal(dto.getWeekTotal());
+                       return statusRepository.save(w);});
+
+
+            }else if("PREVIOUS".equals(weekGiven)){
+                statusRepository.findById(emp)
+                        .map(p->{p.setPreviousWeek("SUBMITTED");
+                            p.setPreviousTotal(dto.getWeekTotal());
+                              return statusRepository.save(p);});
+
+            }}
+         else {
+                        throw new UserNotFound("User timesheet not found");
         }
-                );
+         return ResponseEntity.ok().build();
+    }
+
+//    public Optional<Clock> getClockByUserAndDate(User user, String date) {
+//        return clockRepository.findByUserAndDate(user, date);
+//    }
+
+    public void saveClock(ClockDTO dto) {
+        User u=em.getReference(User.class,dto.getUserId());
+
+        if("CLOCK_IN".equals(dto.getStatus())){
+            Clock c=new Clock();
+            c.setStart(dto.getStart());
+            c.setDate(dto.getDate());
+            c.setUser(u);
+            clockRepository.save(c);
+            UpdateStatus(u, dto.getStatus());
 
 
+        }
+        else {
+            Optional<Clock> record = clockRepository.
+                    findLastOpenClockByUserAndDate(u.getId(), dto.getDate());
+            if (record.isPresent()) {
+                Clock c = record.get();
+                String st=c.getStart();
+                c.setEnd(dto.getEnd());
+//                c.setShiftTotal();
+                clockRepository.save(c);
+                UpdateStatus(u, dto.getStatus());
 
 
+            }
 
 
-
-
+        }
 
 
     }
+    private void UpdateStatus(User u, String s) {
+        Optional<Status> st = statusRepository.findById(u.getId());
+        if (st.isPresent()) {
+            Status temp_status=st.get();
+            temp_status.setStatus(s);
+            statusRepository.save(temp_status);
+        } else {
+            Status st1 = new Status();
+            st1.setStatus(s);
+            st1.setUser(u);
+            statusRepository.save(st1);
+        }
+    }
+
+    public String userStat(Long id){
+
+        Optional<Status> st=statusRepository.findById(id);
+        if (st.isPresent()) {
+            String tmpStat=st.get().getStatus();
+            return tmpStat;
+        }else{
+            throw new UserNotFound("User Status not found");
+        }
+
+    }
+// SEND WEEK UPDATES TO USE
+public Optional<Status> showWeeks(Long id){
+        return statusRepository.findById(id);
+}
+
+
+
+
+
+
 
 }
 
-    // Upsert logic: find existing by userId + date, update if exists, else create new
-//    public Timesheet upsertTimesheet(Long userId, LocalDate date, TimesheetDTO dto) {
-//        Optional<Timesheet> existingOpt = timesheetRepository.findByUserIdAndDate(userId, date);
-//
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-//
-//        Timesheet ts;
-//        if (existingOpt.isPresent()) {
-//            ts = existingOpt.get();
-//            // Update fields
-//            ts.setStart(dto.getStart());
-//            ts.setEnd(dto.getEnd());
-//            ts.setTotal(dto.getTotal());
-//            ts.setProject(dto.getProject());
-//            ts.setWeek(dto.getWeek());
-//            // User and Date do not change
-//        } else {
-//            ts = new Timesheet();
-//            ts.setUser(user);
-//            ts.setDate(date);
-//            ts.setStart(dto.getStart());
-//            ts.setEnd(dto.getEnd());
-//            ts.setTotal(dto.getTotal());
-//            ts.setProject(dto.getProject());
-//            ts.setWeek(dto.getWeek());
-//        }
-//        return timesheetRepository.save(ts);
-//    }
-//}
+
+
+
+
+
+
+
+
+
+
+
+
 

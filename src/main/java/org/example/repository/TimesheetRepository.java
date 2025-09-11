@@ -7,6 +7,5 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface TimesheetRepository extends JpaRepository<Timesheet, Long> {
-    public Optional<Timesheet> findByUser_IdAndDate(Long userId, LocalDate date);
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 //@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"Emp_No", "date"}))
@@ -14,7 +15,7 @@ public class Timesheet {
     private Long s_no;
 //    @Column(name = "UserId")
 //    private Long user_id;
-    private LocalDate date;
+    private String date;
     @Column(name = "StartTime")
     private String start;
     private String week;
@@ -63,11 +64,11 @@ public class Timesheet {
         this.user = user;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

@@ -1,75 +1,27 @@
 package org.example.dto;
 
-import java.time.LocalDate;
+import java.util.List;
 
 public class TimesheetDTO {
-
-    private Long userId;
-    private String start;
-    private String end;
-    private LocalDate date;
-    private String total;
     private String week;
-    private String project;
+    private String weekTotal;
+    private String weekType;
+    private List<TimesheetDTOEntries> entries;
 
-    public TimesheetDTO(Long userId, LocalDate date, String start, String end,
-                        String total, String week, String project) {
-        this.userId = userId;
-        this.start = start;
-        this.end = end;
-        this.date=date;
-        this.total = total;
-        this.week = week;
-        this.project = project;
-
+    public String getWeekType() {
+        return weekType;
     }
 
-
-    public Long getUserId() {
-        return userId;
+    public void setWeekType(String weekType) {
+        this.weekType = weekType;
     }
 
-
-
-    public void setUserId(Long user_id) {
-        this.userId = user_id;
+    public String getWeekTotal() {
+        return weekTotal;
     }
 
-    public void setStart(String start) {
-        this.start = start;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-
-    public String getStart() {
-        return start;
-    }
-
-
-
-    public String getEnd() {
-        return end;
-    }
-
-    public void setEnd(String end) {
-        this.end = end;
-    }
-
-
-
-    public String getTotal() {
-        return total;
-    }
-
-    public void setTotal(String total) {
-        this.total = total;
+    public void setWeekTotal(String weekTotal) {
+        this.weekTotal = weekTotal;
     }
 
     public String getWeek() {
@@ -80,11 +32,14 @@ public class TimesheetDTO {
         this.week = week;
     }
 
-    public String getProject() {
-        return project;
+    public List<TimesheetDTOEntries> getEntries() {
+        return entries;
     }
 
-    public void setProject(String project) {
-        this.project = project;
+    public void setEntries(List<TimesheetDTOEntries> entries) {
+        this.entries = entries;
     }
 }
+
+
+
