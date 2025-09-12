@@ -15,6 +15,7 @@ public class Status {
     private String week;
 
     private Double total; // total hours in the week
+    private String status; // e.g., "Submitted"
 
     public Long getId() {
         return id;
@@ -56,5 +57,5 @@ public class Status {
         this.status = status;
     }
 
-    private String status; // e.g., "Submitted"
+
 }

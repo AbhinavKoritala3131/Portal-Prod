@@ -32,12 +32,16 @@ public class UserController {
 //    }
 //    GetById , DeleteById
 
+
+
+
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> createUser(@Valid  @RequestBody User user) {
         if(userRepository.existsByEmail(user.getEmail()) || userRepository.existsBySsn(user.getSsn())
         || userRepository.existsByMobile(user.getMobile())){
             throw new UserExists("User already exists, Please Sign-In");
         }
+
         User reg = userService.registerUser(user);
         Map<String,String> response = new HashMap<>();
         response.put("message","You are all set "+reg.getFname()+ " Please go ahead and Sign-In");

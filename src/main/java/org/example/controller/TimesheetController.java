@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.dto.ClockDTO;
+import org.example.dto.StatusCheckDTO;
 import org.example.dto.TimesheetDTO;
 import org.example.entity.Status;
 import org.example.repository.StatusRepository;
@@ -56,24 +57,33 @@ public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO
                 body(timesheetService.userStat(id));
 
     }
-//    SEND SUBMITTED WEEKS UPDATE
-//    @GetMapping("/updatedWeeks")
-//    public ResponseEntity<Map<String, String>> getWeekStatus(
-//            @RequestParam Long userId,
-//            @RequestParam String currentWeek,
-//            @RequestParam String previousWeek) {
-//
-//        Map<String, String> result = new HashMap<>();
-//
-//        boolean current = statusRepository.findByUserIdAndWeek(userId, currentWeek).isPresent();
-//        boolean previous = statusRepository.findByUserIdAndWeek(userId, previousWeek).isPresent();
-//
-//        result.put("CURRENT", current ? "SUBMITTED" : "PENDING");
-//        result.put("PREVIOUS", previous ? "SUBMITTED" : "PENDING");
-//
-//        return ResponseEntity.ok(result);
-//    }
 
+//    FETCH STATUS TO UPDATE THE SUBMITTED WEEKS
+    @PostMapping("/status-check")
+    public ResponseEntity<Map<String, String>> checkStatus(@RequestBody StatusCheckDTO request) {
+        Long empId = request.getEmpId();
+        List<String> weeks = request.getWeeks();
+
+        if (weeks == null || weeks.size() != 2) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Exactly two weeks must be provided"));
+        }
+
+        List<Status> statuses = statusRepository.findByEmpIdAndWeekIn(empId, weeks);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("previous", null);
+        result.put("current", null);
+
+        for (Status status : statuses) {
+            if (status.getWeek().equals(weeks.get(0))) {
+                result.put("previous", status.getStatus());
+            } else if (status.getWeek().equals(weeks.get(1))) {
+                result.put("current", status.getStatus());
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }
 
 

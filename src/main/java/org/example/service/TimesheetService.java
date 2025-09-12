@@ -54,14 +54,14 @@ public class TimesheetService {
             timesheetRepository.save(timesheet);
         });
 
-        // Save/update Status entity
+        // TO UPDATE THE STATUS AS UPDATED
         Status status = statusRepository.findByEmpIdAndWeek(submissionDTO.getUserId(), submissionDTO.getWeek())
                 .orElse(new Status());
 
         status.setEmpId(submissionDTO.getUserId());
         status.setWeek(submissionDTO.getWeek());
         status.setTotal(submissionDTO.getWeekTotal());
-        status.setStatus("Submitted");
+        status.setStatus("SUBMITTED");
 
         statusRepository.save(status);
     }
