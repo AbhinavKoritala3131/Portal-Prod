@@ -7,56 +7,45 @@ import java.time.Duration;
 @Entity
 public class Status {
     @Id
-    private long id;
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
-    @Column(name = "status")
-    private String status;
-    private String currentWeek;
-    private String currentTotal;
-    private String previousWeek;
-    private String previousTotal;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public User getUser() {
-        return user;
+    private Long empId;
+
+    private String week;
+
+    private Double total; // total hours in the week
+
+    public Long getId() {
+        return id;
     }
 
-    public String getCurrentWeek() {
-        return currentWeek;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setCurrentWeek(String currentWeek) {
-        this.currentWeek = currentWeek;
+    public Long getEmpId() {
+        return empId;
     }
 
-    public String getCurrentTotal() {
-        return currentTotal;
+    public void setEmpId(Long empId) {
+        this.empId = empId;
     }
 
-    public void setCurrentTotal(String currentTotal) {
-        this.currentTotal = currentTotal;
+    public String getWeek() {
+        return week;
     }
 
-    public String getPreviousWeek() {
-        return previousWeek;
+    public void setWeek(String week) {
+        this.week = week;
     }
 
-    public void setPreviousWeek(String previousWeek) {
-        this.previousWeek = previousWeek;
+    public Double getTotal() {
+        return total;
     }
 
-    public String getPreviousTotal() {
-        return previousTotal;
-    }
-
-    public void setPreviousTotal(String previousTotal) {
-        this.previousTotal = previousTotal;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
     public String getStatus() {
@@ -66,4 +55,6 @@ public class Status {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    private String status; // e.g., "Submitted"
 }

@@ -8,24 +8,18 @@ import java.time.LocalTime;
 import java.util.Date;
 
 public class TimesheetDTOEntries {
-        private Long UserId;
-        private LocalDate date;
-        private LocalTime start;
-        private LocalTime end;
-        private Double total;
-        private String project;
-        private String week;
+    private Long userId;
+    private LocalTime start;
+    private LocalTime end;
+    private LocalDate date;
+    private String week;
 
-    public Double getTotal() {
-        return total;
+    public Long getUserId() {
+        return userId;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public LocalTime getStart() {
@@ -44,26 +38,12 @@ public class TimesheetDTOEntries {
         this.end = end;
     }
 
-    public Long getUserId() {
-        return UserId;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setUserId(Long userId) {
-        UserId = userId;
-    }
-
-    public void setTotal(Double total) {
-        this.total = total;
-    }
-
-
-
-    public String getProject() {
-        return project;
-    }
-
-    public void setProject(String project) {
-        this.project = project;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public String getWeek() {
@@ -73,4 +53,23 @@ public class TimesheetDTOEntries {
     public void setWeek(String week) {
         this.week = week;
     }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    private Double total;
+    private String project;
 }

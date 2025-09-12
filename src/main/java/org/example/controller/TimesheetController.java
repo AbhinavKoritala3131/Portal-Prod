@@ -3,6 +3,7 @@ package org.example.controller;
 import org.example.dto.ClockDTO;
 import org.example.dto.TimesheetDTO;
 import org.example.entity.Status;
+import org.example.repository.StatusRepository;
 import org.example.service.TimesheetService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +26,18 @@ public class TimesheetController {
 
     @Autowired
     private TimesheetService  timesheetService;
+    @Autowired
+    private StatusRepository statusRepository;
 //SUBMIT FOR APPROVAL TIMESHEET
-    @PostMapping("/submit")
-    public ResponseEntity<Map<String, String>> submitTimesheet(@RequestBody TimesheetDTO dto) {
-//        LocalDate date = LocalDate.parse(dto.getDate().toString());
-//        Timesheet ts = timesheetService.upsertTimesheet(dto.getUserId(), date, dto);
-        timesheetService.submitApproval(dto);
-        Map<String, String> response = new HashMap<>();
-        response.put("success", "true");
-        response.put("message", "TS Updated Successfully");
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+@PostMapping("/submit")
+public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO) {
+    try {
+        timesheetService.submitTimesheetWeek(submissionDTO);
+        return ResponseEntity.ok("Timesheet submitted successfully");
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Failed to submit timesheet");
     }
+}
 
 //    SETS CLOCKIN AND CLOCKOUT DATA MADE BY USER
     @PostMapping("/clock")
@@ -56,18 +57,23 @@ public class TimesheetController {
 
     }
 //    SEND SUBMITTED WEEKS UPDATE
-    @GetMapping("/updatedWeeks")
-    public ResponseEntity<Map<String, Object>> getUpdatedWeeks(@RequestParam Long id){
+//    @GetMapping("/updatedWeeks")
+//    public ResponseEntity<Map<String, String>> getWeekStatus(
+//            @RequestParam Long userId,
+//            @RequestParam String currentWeek,
+//            @RequestParam String previousWeek) {
+//
+//        Map<String, String> result = new HashMap<>();
+//
+//        boolean current = statusRepository.findByUserIdAndWeek(userId, currentWeek).isPresent();
+//        boolean previous = statusRepository.findByUserIdAndWeek(userId, previousWeek).isPresent();
+//
+//        result.put("CURRENT", current ? "SUBMITTED" : "PENDING");
+//        result.put("PREVIOUS", previous ? "SUBMITTED" : "PENDING");
+//
+//        return ResponseEntity.ok(result);
+//    }
 
-        Optional<Status> res=timesheetService.showWeeks(id);
-        if(res.isPresent()) {
-            Map<String, Object> stat = new HashMap<>();
-            stat.put("currentWeek", res.get().getCurrentWeek());
-            stat.put("previousWeek", res.get().getPreviousWeek());
-            return ResponseEntity.status(HttpStatus.OK).body(stat);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
 }
 
 

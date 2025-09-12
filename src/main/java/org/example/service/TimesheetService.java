@@ -1,16 +1,15 @@
 package org.example.service;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.example.dto.ClockDTO;
 import org.example.dto.TimesheetDTO;
 import org.example.dto.TimesheetDTOEntries;
-import org.example.entity.Clock;
-import org.example.entity.Status;
-import org.example.entity.User;
-import org.example.entity.Timesheet;
+import org.example.entity.*;
 import org.example.exception.UserNotFound;
 import org.example.repository.ClockRepository;
 import org.example.repository.StatusRepository;
 import org.example.repository.TimesheetRepository;
+import org.example.repository.UserStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,71 +31,42 @@ public class TimesheetService {
     private ClockRepository clockRepository;
     @Autowired
     private StatusRepository statusRepository;
+    @Autowired
+    private UserStatusRepository userStatusRepository;
 
+    //SUBMIT TIMESHEET RECORDS
+    @Transactional
+    public void submitTimesheetWeek(TimesheetDTO submissionDTO) {
 
-    public ResponseEntity<Void> submitApproval(TimesheetDTO dto) {
+        // Save all timesheet entries for the week
+        List<TimesheetDTOEntries> entries = submissionDTO.getEntries();
 
+        entries.forEach(entryDTO -> {
+            Timesheet timesheet = new Timesheet();
+            timesheet.setEmpId(entryDTO.getUserId());
+            timesheet.setStart(entryDTO.getStart());
+            timesheet.setEnd_time(entryDTO.getEnd());
+            timesheet.setDate(entryDTO.getDate());
+            timesheet.setWeek(entryDTO.getWeek());
+            timesheet.setTotal(entryDTO.getTotal());
+            timesheet.setProject(entryDTO.getProject());
 
-        List<TimesheetDTOEntries> records = dto.getEntries();
-        if (records != null && !records.isEmpty()) {
-            for (TimesheetDTOEntries entry : records) {
-                User u = em.getReference(User.class, entry.getUserId());
+            timesheetRepository.save(timesheet);
+        });
 
-                Timesheet temp = new Timesheet();
-                temp.setUser(u);
-                temp.setProject(entry.getProject());
-                temp.setWeek(entry.getWeek());
-                temp.setTotal(entry.getTotal());
-                temp.setDate(entry.getDate());
-                temp.setEnd(entry.getEnd());
-                temp.setStart(entry.getStart());
-//                 Timesheet timesheet =
-                timesheetRepository.save(temp);
+        // Save/update Status entity
+        Status status = statusRepository.findByEmpIdAndWeek(submissionDTO.getUserId(), submissionDTO.getWeek())
+                .orElse(new Status());
 
-            }
-            Long emp = records.get(0).getUserId();
-            String weekGiven=dto.getWeekType();
-            if("CURRENT".equals(weekGiven)){
-             statusRepository.findById(emp)
-                    .map(w->{w.setCurrentWeek("SUBMITTED");
-                        double decimalHours = dto.getWeekTotal();
-                        long totalSeconds = (long) (decimalHours * 3600);
-                        long hours = totalSeconds / 3600;
-                        long minutes = (totalSeconds % 3600) / 60;
-                        long seconds = totalSeconds % 60;
-                        String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-                        w.setCurrentTotal(formatted);
-                       return statusRepository.save(w);});
+        status.setEmpId(submissionDTO.getUserId());
+        status.setWeek(submissionDTO.getWeek());
+        status.setTotal(submissionDTO.getWeekTotal());
+        status.setStatus("Submitted");
 
-
-            }else if("PREVIOUS".equals(weekGiven)){
-                statusRepository.findById(emp)
-                        .map(p -> {
-                            p.setPreviousWeek("SUBMITTED");
-
-                            double decimalHours = dto.getWeekTotal();
-                            long totalSeconds = (long) (decimalHours * 3600);
-                            long hours = totalSeconds / 3600;
-                            long minutes = (totalSeconds % 3600) / 60;
-                            long seconds = totalSeconds % 60;
-                            String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-                            p.setPreviousTotal(formatted);
-
-                            return statusRepository.save(p);
-                        });
-
-
-            }}
-         else {
-                        throw new UserNotFound("User timesheet not found");
-        }
-         return ResponseEntity.ok().build();
+        statusRepository.save(status);
     }
 
-//    public Optional<Clock> getClockByUserAndDate(User user, String date) {
-//        return clockRepository.findByUserAndDate(user, date);
-//    }
-
+// USER CLOCKIN/OUT DETAILS EVERYSHIT DURATION
     public void saveClock(ClockDTO dto) {
         User u=em.getReference(User.class,dto.getUserId());
 
@@ -142,23 +112,24 @@ public class TimesheetService {
 
 
     }
+//    UPDATE USER CLOCKIN/OUT STATUS
     private void UpdateStatus(User u, String s) {
-        Optional<Status> st = statusRepository.findById(u.getId());
+        Optional<UserStatus> st = userStatusRepository.findById(u.getId());
         if (st.isPresent()) {
-            Status temp_status=st.get();
+            UserStatus temp_status=st.get();
             temp_status.setStatus(s);
-            statusRepository.save(temp_status);
+            userStatusRepository.save(temp_status);
         } else {
-            Status st1 = new Status();
+            UserStatus st1 = new UserStatus();
             st1.setStatus(s);
             st1.setUser(u);
-            statusRepository.save(st1);
+            userStatusRepository.save(st1);
         }
     }
-
+//TO SEND USER CLOCK STATUS TO REACT TO UPDATE CLOCK STATUS
     public String userStat(Long id){
 
-        Optional<Status> st=statusRepository.findById(id);
+        Optional<UserStatus> st=userStatusRepository.findById(id);
         if (st.isPresent()) {
             String tmpStat=st.get().getStatus();
             return tmpStat;

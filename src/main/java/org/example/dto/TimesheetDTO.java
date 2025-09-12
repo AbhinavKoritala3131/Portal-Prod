@@ -4,25 +4,17 @@ import java.time.Duration;
 import java.util.List;
 
 public class TimesheetDTO {
+    private Long userId;
     private String week;
-    private double weekTotal;
-    private String weekType;
+    private Double weekTotal;
     private List<TimesheetDTOEntries> entries;
 
-    public String getWeekType() {
-        return weekType;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setWeekType(String weekType) {
-        this.weekType = weekType;
-    }
-
-    public double getWeekTotal() {
-        return weekTotal;
-    }
-
-    public void setWeekTotal(double weekTotal) {
-        this.weekTotal = weekTotal;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getWeek() {
@@ -31,6 +23,14 @@ public class TimesheetDTO {
 
     public void setWeek(String week) {
         this.week = week;
+    }
+
+    public Double getWeekTotal() {
+        return weekTotal;
+    }
+
+    public void setWeekTotal(Double weekTotal) {
+        this.weekTotal = weekTotal;
     }
 
     public List<TimesheetDTOEntries> getEntries() {
