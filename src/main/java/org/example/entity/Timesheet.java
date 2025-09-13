@@ -26,6 +26,11 @@ public class Timesheet {
 
     private String week; // e.g., "2025-09-07 - 2025-09-13"
 
+
+    private Double total; // total hours for the day
+
+    private String project;
+
     public Long getId() {
         return id;
     }
@@ -91,8 +96,4 @@ public class Timesheet {
     public void setProject(String project) {
         this.project = project;
     }
-
-    private Double total; // total hours for the day
-
-    private String project;
 }
