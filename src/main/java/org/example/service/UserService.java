@@ -1,39 +1,46 @@
 package org.example.service;
 
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import org.example.entity.Login;
+import org.example.entity.AuthorizeUsers;
+import org.example.dto.LoginDTO;
 import org.example.entity.User;
 import org.example.exception.InvalidCredentialsException;
 import org.example.exception.UserNotFound;
+import org.example.repository.AuthorizeUsersRepository;
 import org.example.repository.UserRepository;
 import org.example.security.SSNEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class UserService {
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AuthorizeUsersRepository authorizeUsersRepository;
 
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     public User registerUser(User user) {
-
 
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
         user.updatedName(user.getFname(), user.getLname());
+        Optional<AuthorizeUsers> au=authorizeUsersRepository.getByEmail(user.getEmail());
+        if(au.isPresent()){ AuthorizeUsers xy= au.get();
+            user.setAuthorizeUsers(xy);
+            user.setRole(xy.getRole());
+        }
+
 
         try {
             String encryptedSSN=SSNEncryptor.encrypt(user.getSsn());
@@ -47,13 +54,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Map<String, Object> login(Login l) {
+    public Map<String, Object> login(LoginDTO l) {
         return userRepository.findByEmail(l.getEmail())
                 .map(u -> {Map<String, Object> map = new HashMap<>();
                     if (passwordEncoder.matches(l.getPassword(), u.getPassword())) {
 
                         map.put("message", "Welcome " + u.getFname() + " !");
                         map.put("userId",u.getId());
+                        map.put("role",u.getRole());
                         return map;
                     } else {
 
@@ -74,6 +82,7 @@ public class UserService {
             map.put("mobile", u.getMobile());
             map.put("country",  u.getCountry());
             map.put("DOB", u.getDob());
+            map.put("role", u.getRole());
             return map;
         }).orElseThrow(()-> new UserNotFound("User Details Not Found"));
     }

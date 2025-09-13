@@ -10,9 +10,15 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "emp_no")  // FK to emp_id
+    private AuthorizeUsers authorizeUsers;
     @NotBlank(message="name should not be blank")
     private String fname;
     private String lname;
@@ -22,6 +28,27 @@ public class User {
     private String email;
     private String password;
     private String country;
+    private String role;
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getCountry() {
         return country;
@@ -36,12 +63,12 @@ public class User {
     private String ssn;
     private LocalDate dob;
 
-    public Long getId() {
-        return id;
+    public AuthorizeUsers getAuthorizeUsers() {
+        return authorizeUsers;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAuthorizeUsers(AuthorizeUsers authorizeUsers) {
+        this.authorizeUsers = authorizeUsers;
     }
 
     public String getFname() {

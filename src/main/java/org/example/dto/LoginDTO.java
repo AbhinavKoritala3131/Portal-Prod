@@ -1,11 +1,10 @@
-package org.example.entity;
+package org.example.dto;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 
-@Entity
-public class Login {
+
+public class LoginDTO {
     @NotBlank
     @Id
     private String email;

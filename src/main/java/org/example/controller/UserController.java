@@ -1,8 +1,10 @@
 package org.example.controller;
 
-import org.example.entity.Login;
+import org.example.entity.AuthorizeUsers;
+import org.example.dto.LoginDTO;
 import org.example.entity.User;
 import org.example.exception.UserExists;
+import org.example.repository.AuthorizeUsersRepository;
 import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,8 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:5173")  // allow your frontend URL
 @RestController
@@ -25,6 +27,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AuthorizeUsersRepository authorizeUsersRepository;
 
 //    @GetMapping("/getAll")
 //    public List<User> findAll() {
@@ -37,22 +41,28 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> createUser(@Valid  @RequestBody User user) {
-        if(userRepository.existsByEmail(user.getEmail()) || userRepository.existsBySsn(user.getSsn())
-        || userRepository.existsByMobile(user.getMobile())){
+        if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsBySsn(user.getSsn())
+                || userRepository.existsByMobile(user.getMobile())) {
             throw new UserExists("User already exists, Please Sign-In");
         }
-
-        User reg = userService.registerUser(user);
-        Map<String,String> response = new HashMap<>();
-        response.put("message","You are all set "+reg.getFname()+ " Please go ahead and Sign-In");
-        return ResponseEntity.status(200).body(response); }
+        Optional<AuthorizeUsers> v = authorizeUsersRepository.findByEmail(user.getEmail());
+        if (v.isPresent()) {
+            User reg = userService.registerUser(user);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "You are all set " + reg.getFname() + " Please go ahead and Sign-In");
+            return ResponseEntity.status(200).body(response);
+        }
+        else{
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You dont have access. Please contact your administrator");
+        }
+    }
 
 
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,Object>> signIn(@Valid @RequestBody Login login){
+    public ResponseEntity<Map<String,Object>> signIn(@Valid @RequestBody LoginDTO loginDTO){
 
-        return ResponseEntity.status(200).body(userService.login(login));
+        return ResponseEntity.status(200).body(userService.login(loginDTO));
 
     }
     @GetMapping("/fetch/{id}")
