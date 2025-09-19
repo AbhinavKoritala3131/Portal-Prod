@@ -27,7 +27,7 @@ public class Timesheet {
     private String week; // e.g., "2025-09-07 - 2025-09-13"
 
 
-    private Double total; // total hours for the day
+    private int total; // total hours for the day
 
     private String project;
 
@@ -81,11 +81,11 @@ public class Timesheet {
         this.date = date;
     }
 
-    public Double getTotal() {
+    public int getTotal() {
         return total;
     }
 
-    public void setTotal(Double total) {
+    public void setTotal(int total) {
         this.total = total;
     }
 

@@ -14,8 +14,17 @@ public class Status {
 
     private String week;
 
-    private Double total; // total hours in the week
+    private int total; // total hours in the week
     private String status; // e.g., "Submitted"
+    private String remarks;
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
     public Long getId() {
         return id;
@@ -41,11 +50,11 @@ public class Status {
         this.week = week;
     }
 
-    public Double getTotal() {
+    public int getTotal() {
         return total;
     }
 
-    public void setTotal(Double total) {
+    public void setTotal(int total) {
         this.total = total;
     }
 

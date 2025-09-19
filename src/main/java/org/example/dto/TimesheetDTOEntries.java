@@ -54,11 +54,11 @@ public class TimesheetDTOEntries {
         this.week = week;
     }
 
-    public Double getTotal() {
+    public int getTotal() {
         return total;
     }
 
-    public void setTotal(Double total) {
+    public void setTotal(int total) {
         this.total = total;
     }
 
@@ -70,6 +70,6 @@ public class TimesheetDTOEntries {
         this.project = project;
     }
 
-    private Double total;
+    private Integer total;
     private String project;
 }

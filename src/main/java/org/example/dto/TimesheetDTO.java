@@ -6,7 +6,7 @@ import java.util.List;
 public class TimesheetDTO {
     private Long userId;
     private String week;
-    private Double weekTotal;
+    private int weekTotal;
     private List<TimesheetDTOEntries> entries;
 
     public Long getUserId() {
@@ -25,11 +25,11 @@ public class TimesheetDTO {
         this.week = week;
     }
 
-    public Double getWeekTotal() {
+    public int getWeekTotal() {
         return weekTotal;
     }
 
-    public void setWeekTotal(Double weekTotal) {
+    public void setWeekTotal(int weekTotal) {
         this.weekTotal = weekTotal;
     }
 

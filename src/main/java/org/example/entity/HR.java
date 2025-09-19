@@ -15,7 +15,7 @@ public class HR {
     private String email;
     private String ssn;
     private String Week;
-    private String hours;
+    private int hours;
     private String payroll;
 
     public void setS_no(Long s_no) {
@@ -63,11 +63,11 @@ public class HR {
         Week = week;
     }
 
-    public String getHours() {
+    public int getHours() {
         return hours;
     }
 
-    public void setHours(String hours) {
+    public void setHours(int hours) {
         this.hours = hours;
     }
 

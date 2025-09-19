@@ -6,6 +6,7 @@
 --                                                                                                   ('1993-04-04', 'USA', 'user4@example.com', 'Alice', 'Alice Brown', 'Brown', '5566778899', 'password', '444-44-4444', 'USER'),
 --                                                                                                   ('1994-05-05', 'USA', 'user5@example.com', 'Eve', 'Eve Davis', 'Davis', '6677889900', 'password', '555-55-5555', 'USER');
 INSERT INTO authorize_users (emp_id, email, role) VALUES
-                                                      (455, 'ab@example.com', 'ADMIN'),
-                                                      (105, 'ak@example.com', 'USER'),
+                                                      (455, 'a@admin.com', 'ADMIN'),
+                                                      (105, 'u@user.com', 'USER'),
                                                       (3, 'user3@example.com', 'USER');
+
