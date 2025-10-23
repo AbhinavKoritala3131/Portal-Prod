@@ -14,6 +14,7 @@ import org.example.security.SSNEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
@@ -35,6 +36,7 @@ public class AdminController {
 
 
     @GetMapping("/timesheets-by-week")
+    @PreAuthorize("hasRole('ADMIN')")
 
     public ResponseEntity<List<Timesheet>> getTimesheetsWithNoRemarks(@RequestParam String week) {
         List<Timesheet> entries = timesheetRepository.findByWeekAndEmpIdIn(
@@ -66,13 +68,14 @@ public class AdminController {
 
 
     @GetMapping("/status-by-week")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Status>> getPendingStatusByWeek(@RequestParam String week) {
         List<Status> pending = statusRepository.findByWeekAndRemarksIsNull(week);
         return ResponseEntity.ok(pending);
     }
 
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-status")
     public ResponseEntity<?> updateStatus(@RequestBody ApprovalStatusDTO request) {
         Optional<Status> statusOpt = statusRepository.findByEmpIdAndWeek(request.getEmpId(), request.getWeek());
@@ -117,7 +120,7 @@ public class AdminController {
 
 
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-multiple")
     public ResponseEntity<?> updateMultipleTimesheets(@RequestBody List<Timesheet> updates) {
         int totalDelta = 0;
