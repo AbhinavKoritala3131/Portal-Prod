@@ -14,18 +14,13 @@ public class User {
     @Id
     private Long id;
 
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "emp_no")  // FK to emp_id
-    private AuthorizeUsers authorizeUsers;
     @NotBlank(message="name should not be blank")
     private String fname;
     private String lname;
     @Column(name = "full_name")
     private String name;
-    @Email(message="invalid format")
-    private String email;
+    @Column(nullable = false, unique = true)
+    private String username;
     private String password;
     private String country;
     private String role;
@@ -63,13 +58,7 @@ public class User {
     private String ssn;
     private LocalDate dob;
 
-    public AuthorizeUsers getAuthorizeUsers() {
-        return authorizeUsers;
-    }
 
-    public void setAuthorizeUsers(AuthorizeUsers authorizeUsers) {
-        this.authorizeUsers = authorizeUsers;
-    }
 
     public String getFname() {
         return fname;
@@ -95,12 +84,16 @@ public class User {
         this.name = fname+" "+lname;
     }
 
-    public String getEmail() {
-        return email;
+
+
+
+
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getMobile() {

@@ -50,13 +50,7 @@ public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO
 
     }
 
-//    CURRENT CLOCK STATUS OF USER FOR BUTTON
-    @GetMapping("/status/{id}")
-    public ResponseEntity<String> getUserStatus(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).
-                body(timesheetService.userStat(id));
 
-    }
 
 //    FETCH STATUS TO UPDATE THE SUBMITTED WEEKS
     @PostMapping("/status-check")

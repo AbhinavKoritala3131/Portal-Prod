@@ -127,14 +127,14 @@ public class TimesheetService {
         }
     }
 //TO SEND USER CLOCK STATUS TO REACT TO UPDATE CLOCK STATUS
-    public String userStat(Long id){
+     String userStat(Long id){
 
         Optional<UserStatus> st=userStatusRepository.findById(id);
         if (st.isPresent()) {
             String tmpStat=st.get().getStatus();
             return tmpStat;
         }else{
-            throw new UserNotFound("User Status not found");
+            return "CLOCK_OUT";
         }
 
     }

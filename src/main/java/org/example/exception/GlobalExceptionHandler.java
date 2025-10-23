@@ -50,22 +50,14 @@ public ResponseEntity<Map<String, Object>> handleEntityNotFoundException(EntityN
 
 }
 @ExceptionHandler(UserNotFound.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFound ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleUserNotFound(UserNotFound ex) {
+    return  ResponseEntity.status(401).body(ex.getMessage());
 }
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.UNAUTHORIZED.value());
-        response.put("error", "Unauthorized");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+
+        return  ResponseEntity.status(401).body(ex.getMessage());
     }
+
 
 }

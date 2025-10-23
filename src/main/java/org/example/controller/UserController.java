@@ -1,20 +1,22 @@
 package org.example.controller;
 
-import org.example.entity.AuthorizeUsers;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.entity.AuthorizedUser;
 import org.example.dto.LoginDTO;
 import org.example.entity.User;
-import org.example.exception.UserExists;
-import org.example.repository.AuthorizeUsersRepository;
+import org.example.exception.UserNotFound;
+import org.example.jwtConfig.JWTService;
+import org.example.repository.AuthUsersRepo;
 import org.example.repository.UserRepository;
 import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,7 +30,10 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AuthorizeUsersRepository authorizeUsersRepository;
+    private AuthUsersRepo authUsersRepo;
+
+    @Autowired
+    private JWTService jwtService;
 
 //    @GetMapping("/getAll")
 //    public List<User> findAll() {
@@ -40,35 +45,60 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> createUser(@Valid  @RequestBody User user) {
-        if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsBySsn(user.getSsn())
-                || userRepository.existsByMobile(user.getMobile())) {
-            throw new UserExists("User already exists, Please Sign-In");
+    public ResponseEntity<String> createUser(@Valid  @RequestBody User user) {
+        Optional<AuthorizedUser> authUser = authUsersRepo.findByUsername(user.getUsername());
+        if (authUser.isPresent()) {
+            if(userRepository.existsByMobile(user.getMobile()) || userRepository.existsBySsn(
+                        user.getSsn()
+            )){
+                return ResponseEntity.status(409).body("Details already exists");
+            }
+
+            return userService.register(user);
+
         }
-        Optional<AuthorizeUsers> v = authorizeUsersRepository.findByEmail(user.getEmail());
-        if (v.isPresent()) {
-            User reg = userService.registerUser(user);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "You are all set " + reg.getFname() + " Please go ahead and Sign-In");
-            return ResponseEntity.status(200).body(response);
+
+        else{Optional<User> exUser = userRepository.findByUsername(user.getUsername());
+            if(exUser.isPresent()){
+            return ResponseEntity.status(409).body("User already exists");
+
         }
-        else{
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You dont have access. Please contact your administrator");
-        }
+
+            else{
+                return ResponseEntity.status(401).body("You dont have access. Please contact your administrator");
+            }}
+
+
+
     }
 
 
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,Object>> signIn(@Valid @RequestBody LoginDTO loginDTO){
+    public ResponseEntity<Map<String,String>> signIn(@Valid @RequestBody LoginDTO loginDTO,
+                                                     HttpServletResponse response){
+        if(userRepository.existsByUsername(loginDTO.getUsername())){
 
-        return ResponseEntity.status(200).body(userService.login(loginDTO));
+        return userService.login(loginDTO, response);}
+        else{
+            throw new UserNotFound("Please register before login ");
+        }
 
     }
-    @GetMapping("/fetch/{id}")
-    public ResponseEntity<Map<String,Object>> userDetails(@PathVariable Long id){
-        return ResponseEntity.status(200).body(userService.getUser(id));
+
+
+
+
+    @GetMapping("/who")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
+        }
+        else{
+            return userService.getUserRole(authHeader);
+        }
     }
+
 
 //    }
 //    @PutMapping("/update/{id}")
@@ -104,4 +134,5 @@ public class UserController {
 //        }
 //        else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Check your ID and Try again ");
 //    }
+
 }

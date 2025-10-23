@@ -91,7 +91,7 @@ public class AdminController {
                     Optional<User> u = userRepository.findById(request.getEmpId());
                     if (u.isPresent()) {
                         User user = u.get();
-                        hr.setEmail(user.getEmail());
+                        hr.setEmail(user.getUsername());
                         try {
                             String decryptedSsn = SSNEncryptor.decrypt(user.getSsn());
                             hr.setSsn(decryptedSsn);
@@ -99,7 +99,7 @@ public class AdminController {
                             throw new RuntimeException("Problem decrypting SSN");
                         }
                         hr.setName(user.getName());
-                        hr.setEmail(user.getEmail());
+                        hr.setEmail(user.getUsername());
                         hrRepository.save(hr);
                     }
                 }else{

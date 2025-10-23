@@ -1,24 +1,31 @@
 package org.example.service;
 
 
-import org.example.entity.AuthorizeUsers;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.entity.AuthorizedUser;
 import org.example.dto.LoginDTO;
 import org.example.entity.User;
 import org.example.exception.InvalidCredentialsException;
 import org.example.exception.UserNotFound;
-import org.example.repository.AuthorizeUsersRepository;
+import org.example.jwtConfig.JWTService;
+import org.example.repository.AuthUsersRepo;
 import org.example.repository.UserRepository;
 import org.example.security.SSNEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -27,51 +34,67 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AuthorizeUsersRepository authorizeUsersRepository;
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTService jwtService;
+    @Autowired
+    private AuthUsersRepo authUsersRepo;
+
+    @Autowired
+    private TimesheetService timesheetService;
 
 
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    public User registerUser(User user) {
-
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
+    public ResponseEntity<String> register(User user) {
+        AuthorizedUser au = authUsersRepo.getByUsername(user.getUsername());
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+        user.setPassword(encoder.encode(user.getPassword()));
+        user.setName(user.getName());
         user.updatedName(user.getFname(), user.getLname());
-        Optional<AuthorizeUsers> au=authorizeUsersRepository.getByEmail(user.getEmail());
-        if(au.isPresent()){ AuthorizeUsers xy= au.get();
-            user.setAuthorizeUsers(xy);
-            user.setRole(xy.getRole());
-        }
-
-
         try {
-            String encryptedSSN=SSNEncryptor.encrypt(user.getSsn());
+            String encryptedSSN = SSNEncryptor.encrypt(user.getSsn());
             user.setSsn(encryptedSSN); // Before saving to DB
             // TO DECRYPT : String decryptedSsn = SSNEncryptor.decrypt(user.getSsn()); // Only for authorized roles
-        }catch(Exception re){
+        } catch (Exception re) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid SSN");
         }
 
-
-        return userRepository.save(user);
-    }
-
-    public Map<String, Object> login(LoginDTO l) {
-        return userRepository.findByEmail(l.getEmail())
-                .map(u -> {Map<String, Object> map = new HashMap<>();
-                    if (passwordEncoder.matches(l.getPassword(), u.getPassword())) {
-
-                        map.put("message", "Welcome " + u.getFname() + " !");
-                        map.put("userId",u.getId());
-                        map.put("role",u.getRole());
-                        return map;
-                    } else {
-
-                        throw new InvalidCredentialsException("Wrong email or password");
-                    }
-
-                }).orElseThrow(() ->  new UserNotFound("Please register before login"));
+        user.setRole(au.getRole());
+        user.setId(au.getId());
+        authUsersRepo.delete(au); //Removes authUsers after registration.
+        userRepository.save(user);
+        return ResponseEntity.status(200).body(" You are all set "+user.getFname()+" !");
 
     }
+
+    public ResponseEntity<Map<String,String>> login(LoginDTO l, HttpServletResponse response) {
+        try {
+
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(l.getUsername(), l.getPassword()));
+            if (authentication.isAuthenticated()) {
+                String jwtTok=jwtService.generateToken(l.getUsername()
+                );
+
+
+
+
+                Map<String,String> map = new HashMap<>();
+                map.put("jwtToken",jwtTok);
+                map.put("msg","Login Success");
+
+                return ResponseEntity.ok(map);
+            }
+        }catch(Exception e) {
+            throw new InvalidCredentialsException("Invalid Credentials");
+
+        }
+        return null;
+
+
+
+    }
+
+
 
     public Map<String,Object> getUser(long id){
         return userRepository.findById(id).map(u->{ Map<String, Object> map = new HashMap<>();
@@ -79,7 +102,7 @@ public class UserService {
         map.put("fName", u.getFname());
         map.put("lName", u.getLname());
             map.put("userName", userRepository.getById(u.getId()).getName());
-            map.put("email", u.getEmail());
+            map.put("email", u.getUsername());
             map.put("mobile", u.getMobile());
             map.put("country",  u.getCountry());
             map.put("DOB", u.getDob());
@@ -89,10 +112,32 @@ public class UserService {
     }
 
 
+    public ResponseEntity<?> getUserRole(String authHeader) {
+        String token = authHeader.substring(7);
+        try {
+            String username = jwtService.extractUserName(token);
+            Optional<User> userOpt = userRepository.findByUsername(username);
+
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            User user = userOpt.get();
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole());
+            response.put("userId", user.getId());
+            response.put("fName", user.getFname());
+            response.put("ClockStatus", timesheetService.userStat(user.getId()));
+            return ResponseEntity.ok(response);
+
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+    }
 
 
 
 
 }
-
-
