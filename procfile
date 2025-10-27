@@ -1,1 +1,1 @@
-web: java -jar target/myproject1-1.0-SNAPSHOT.jar
+web: java -jar target/portal-Prod-1.0-SNAPSHOT.jar

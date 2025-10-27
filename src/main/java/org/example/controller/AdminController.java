@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "${FRONTEND_URL:http://localhost:5173}")
+
 @RequestMapping("/admins")
 public class AdminController {
     @Autowired

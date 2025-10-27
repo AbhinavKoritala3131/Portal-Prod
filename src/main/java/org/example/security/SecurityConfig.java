@@ -5,6 +5,7 @@ import org.example.jwtConfig.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,7 +34,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(customizer->customizer.disable())
                 .authorizeHttpRequests(Requests -> Requests
-                        .requestMatchers("/users/register","/users/login").permitAll()
+                        .requestMatchers("/users/register","/users/login","/health").permitAll()
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .anyRequest().authenticated())
 //                .requiresChannel(channel -> channel.anyRequest().requiresSecure()) // HTTPS enforcement (not in DEV)
 //                .formLogin(Customizer.withDefaults())
