@@ -27,11 +27,12 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    // Use def to avoid Jenkins warning
-                    def appVersion = bat(
+                    // Properly extract version on Windows (last line only)
+                    def output = bat(
                         script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
                         returnStdout: true
-                    ).trim()
+                    ).trim().split('\r?\n')
+                    def appVersion = output[-1]  // last line is actual version
                     def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
                     env.APP_VERSION = appVersion
                     env.EB_VERSION_LABEL = ebVersionLabel
@@ -55,7 +56,6 @@ pipeline {
         stage('Deploy to Elastic Beanstalk') {
             steps {
                 echo "Deploying to Elastic Beanstalk..."
-                // Using AWS Steps Plugin
                 withAWS(credentials: 'aws-eb-creds', region: "${AWS_REGION}") {
                     bat """
                         aws s3 cp app.zip s3://${S3_BUCKET}/app-${EB_VERSION_LABEL}.zip
