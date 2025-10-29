@@ -27,6 +27,7 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
+                    // Use def to avoid Jenkins warning
                     def appVersion = bat(
                         script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
                         returnStdout: true
@@ -55,10 +56,15 @@ pipeline {
             steps {
                 echo "Deploying to Elastic Beanstalk..."
                 withAWS(credentials: 'aws-eb-creds', region: "${AWS_REGION}") {
-                    // Avoid line continuations for Windows
+                    // Use env.EB_VERSION_LABEL to avoid path issues
                     bat """
+                        REM Upload to S3
                         aws s3 cp app.zip s3://${S3_BUCKET}/app-${env.EB_VERSION_LABEL}.zip
+
+                        REM Create new EB application version
                         aws elasticbeanstalk create-application-version --application-name ${APPLICATION_NAME} --version-label ${env.EB_VERSION_LABEL} --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${env.EB_VERSION_LABEL}.zip
+
+                        REM Update EB environment
                         aws elasticbeanstalk update-environment --environment-name ${ENVIRONMENT_NAME} --version-label ${env.EB_VERSION_LABEL}
                     """
                 }
