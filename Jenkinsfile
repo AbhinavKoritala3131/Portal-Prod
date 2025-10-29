@@ -27,14 +27,11 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    // Properly capture Maven project version on Windows
-                    def appVersion = bat(
-                        script: '@echo off & for /f "delims=" %%i in (\'mvn help:evaluate -Dexpression=project.version -q -DforceStdout\') do @echo %%i',
-                        returnStdout: true
-                    ).trim()
-
+                    def pom = readFile('pom.xml')
+                    def pomXml = new XmlSlurper().parseText(pom)
+                    def appVersion = pomXml.version.text()
                     if (!appVersion) {
-                        error "Failed to extract project version from pom.xml"
+                        error "Failed to read version from pom.xml"
                     }
 
                     def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
@@ -73,7 +70,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
