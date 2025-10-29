@@ -27,17 +27,15 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    def pom = readFile('pom.xml')
-                    def pomXml = new XmlSlurper().parseText(pom)
-                    def appVersion = pomXml.version.text()
-                    if (!appVersion) {
-                        error "Failed to read version from pom.xml"
-                    }
-
+                    // Properly extract version on Windows (last line only)
+                    def output = bat(
+                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
+                        returnStdout: true
+                    ).trim().split('\r?\n')
+                    def appVersion = output[-1]  // last line is actual version
                     def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
                     env.APP_VERSION = appVersion
                     env.EB_VERSION_LABEL = ebVersionLabel
-
                     echo "App version: ${env.APP_VERSION}"
                     echo "EB version label: ${env.EB_VERSION_LABEL}"
                 }
@@ -59,14 +57,16 @@ pipeline {
             steps {
                 echo "Deploying to Elastic Beanstalk..."
                 withAWS(credentials: 'aws-eb-creds', region: "${AWS_REGION}") {
-                    // Upload to S3
-                    bat "aws s3 cp app.zip s3://${S3_BUCKET}/app-${env.EB_VERSION_LABEL}.zip"
-
-                    // Create application version
-                    bat "aws elasticbeanstalk create-application-version --application-name ${APPLICATION_NAME} --version-label ${env.EB_VERSION_LABEL} --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${env.EB_VERSION_LABEL}.zip"
-
-                    // Update environment
-                    bat "aws elasticbeanstalk update-environment --environment-name ${ENVIRONMENT_NAME} --version-label ${env.EB_VERSION_LABEL}"
+                    bat """
+                        aws s3 cp app.zip s3://${S3_BUCKET}/app-${EB_VERSION_LABEL}.zip
+                        aws elasticbeanstalk create-application-version ^
+                            --application-name ${APPLICATION_NAME} ^
+                            --version-label ${EB_VERSION_LABEL} ^
+                            --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${EB_VERSION_LABEL}.zip
+                        aws elasticbeanstalk update-environment ^
+                            --environment-name ${ENVIRONMENT_NAME} ^
+                            --version-label ${EB_VERSION_LABEL}
+                    """
                 }
             }
         }
