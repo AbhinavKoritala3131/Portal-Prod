@@ -27,10 +27,16 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    APP_VERSION = bat(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
-                    echo "App version: ${APP_VERSION}"
-                    EB_VERSION_LABEL = "${APP_VERSION}-build-${BUILD_NUMBER}"
-                    echo "EB version label: ${EB_VERSION_LABEL}"
+                    // Use def to avoid Jenkins warning
+                    def appVersion = bat(
+                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
+                        returnStdout: true
+                    ).trim()
+                    def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
+                    env.APP_VERSION = appVersion
+                    env.EB_VERSION_LABEL = ebVersionLabel
+                    echo "App version: ${env.APP_VERSION}"
+                    echo "EB version label: ${env.EB_VERSION_LABEL}"
                 }
             }
         }
@@ -38,26 +44,25 @@ pipeline {
         stage('Bundle Artifact') {
             steps {
                 echo "Preparing deployment bundle..."
-                bat """
+                bat '''
                     if not exist deploy mkdir deploy
                     copy target\\*.jar deploy\\
                     powershell -Command "Compress-Archive -Path deploy\\* -DestinationPath app.zip -Force"
-                """
+                '''
             }
         }
 
         stage('Deploy to Elastic Beanstalk') {
             steps {
                 echo "Deploying to Elastic Beanstalk..."
+                // Using AWS Steps Plugin
                 withAWS(credentials: 'aws-eb-creds', region: "${AWS_REGION}") {
                     bat """
                         aws s3 cp app.zip s3://${S3_BUCKET}/app-${EB_VERSION_LABEL}.zip
-
                         aws elasticbeanstalk create-application-version ^
                             --application-name ${APPLICATION_NAME} ^
                             --version-label ${EB_VERSION_LABEL} ^
                             --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${EB_VERSION_LABEL}.zip
-
                         aws elasticbeanstalk update-environment ^
                             --environment-name ${ENVIRONMENT_NAME} ^
                             --version-label ${EB_VERSION_LABEL}
@@ -69,7 +74,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful! Version: ${EB_VERSION_LABEL}"
+            echo "✅ Deployment successful! Version: ${env.EB_VERSION_LABEL}"
         }
         failure {
             echo "❌ Deployment failed!"
