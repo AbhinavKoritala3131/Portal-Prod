@@ -77,7 +77,7 @@ pipeline {
             echo "✅ Deployment successful! Version: ${env.EB_VERSION_LABEL}"
         }
         failure {
-            echo "❌ Deployment failed!"
+            echo "❌ Deployment failed ! Please try again"
         }
     }
 }
