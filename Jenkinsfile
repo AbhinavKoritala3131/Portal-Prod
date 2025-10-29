@@ -27,12 +27,10 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    // Properly extract version on Windows (last line only)
-                    def output = bat(
+                    def appVersion = bat(
                         script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
                         returnStdout: true
-                    ).trim().split('\r?\n')
-                    def appVersion = output[-1]  // last line is actual version
+                    ).trim()
                     def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
                     env.APP_VERSION = appVersion
                     env.EB_VERSION_LABEL = ebVersionLabel
@@ -57,15 +55,11 @@ pipeline {
             steps {
                 echo "Deploying to Elastic Beanstalk..."
                 withAWS(credentials: 'aws-eb-creds', region: "${AWS_REGION}") {
+                    // Avoid line continuations for Windows
                     bat """
-                        aws s3 cp app.zip s3://${S3_BUCKET}/app-${EB_VERSION_LABEL}.zip
-                        aws elasticbeanstalk create-application-version ^
-                            --application-name ${APPLICATION_NAME} ^
-                            --version-label ${EB_VERSION_LABEL} ^
-                            --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${EB_VERSION_LABEL}.zip
-                        aws elasticbeanstalk update-environment ^
-                            --environment-name ${ENVIRONMENT_NAME} ^
-                            --version-label ${EB_VERSION_LABEL}
+                        aws s3 cp app.zip s3://${S3_BUCKET}/app-${env.EB_VERSION_LABEL}.zip
+                        aws elasticbeanstalk create-application-version --application-name ${APPLICATION_NAME} --version-label ${env.EB_VERSION_LABEL} --source-bundle S3Bucket=${S3_BUCKET},S3Key=app-${env.EB_VERSION_LABEL}.zip
+                        aws elasticbeanstalk update-environment --environment-name ${ENVIRONMENT_NAME} --version-label ${env.EB_VERSION_LABEL}
                     """
                 }
             }
