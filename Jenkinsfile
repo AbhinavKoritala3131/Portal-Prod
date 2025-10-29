@@ -27,9 +27,8 @@ pipeline {
             steps {
                 echo "Extracting version from pom.xml..."
                 script {
-                    // Use def to avoid Jenkins warning
                     def appVersion = bat(
-                        script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout',
+                        script: '@echo off & for /f "delims=" %%i in (\'mvn help:evaluate -Dexpression=project.version -q -DforceStdout\') do @echo %%i',
                         returnStdout: true
                     ).trim()
                     def ebVersionLabel = "${appVersion}-build-${BUILD_NUMBER}"
