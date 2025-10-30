@@ -96,20 +96,6 @@ public class UserService {
 
 
 
-    public Map<String,Object> getUser(long id){
-        return userRepository.findById(id).map(u->{ Map<String, Object> map = new HashMap<>();
-        map.put("userId", u.getId());
-        map.put("fName", u.getFname());
-        map.put("lName", u.getLname());
-            map.put("userName", userRepository.getById(u.getId()).getName());
-            map.put("email", u.getUsername());
-            map.put("mobile", u.getMobile());
-            map.put("country",  u.getCountry());
-            map.put("DOB", u.getDob());
-            map.put("role", u.getRole());
-            return map;
-        }).orElseThrow(()-> new UserNotFound("User Details Not Found"));
-    }
 
 
     public ResponseEntity<?> getUserRole(String authHeader) {
@@ -122,6 +108,7 @@ public class UserService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
 
+
             User user = userOpt.get();
             Map<String, Object> response = new HashMap<>();
             response.put("username", user.getUsername());
@@ -129,6 +116,10 @@ public class UserService {
             response.put("userId", user.getId());
             response.put("fName", user.getFname());
             response.put("ClockStatus", timesheetService.userStat(user.getId()));
+            response.put("country", user.getCountry());
+            response.put("DOB", user.getDob());
+            response.put("mobile", user.getMobile());
+            response.put("lName", user.getLname());
             return ResponseEntity.ok(response);
 
         } catch (JwtException e) {

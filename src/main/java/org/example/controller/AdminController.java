@@ -39,10 +39,10 @@ public class AdminController {
     @GetMapping("/timesheets-by-week")
     @PreAuthorize("hasRole('ADMIN')")
 
-    public ResponseEntity<List<Timesheet>> getTimesheetsWithNoRemarks(@RequestParam String week) {
+    public ResponseEntity<List<Timesheet>> getTimesheetsBySubmittedStatus(@RequestParam String week) {
         List<Timesheet> entries = timesheetRepository.findByWeekAndEmpIdIn(
                 week,
-                statusRepository.findEmpIdsByWeekWithNullRemarks(week)
+                statusRepository.findEmpIdsByWeekWithSubmittedStatus(week)
         );
         return ResponseEntity.ok(entries);
     }
@@ -71,7 +71,7 @@ public class AdminController {
     @GetMapping("/status-by-week")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Status>> getPendingStatusByWeek(@RequestParam String week) {
-        List<Status> pending = statusRepository.findByWeekAndRemarksIsNull(week);
+        List<Status> pending = statusRepository.findByWeekAndStatusIgnoreCase(week, "SUBMITTED");
         return ResponseEntity.ok(pending);
     }
 
@@ -83,10 +83,15 @@ public class AdminController {
 
         if (statusOpt.isPresent()) {
             Status status = statusOpt.get();
+            String newStatus = request.getStatus();
+            String remarks = request.getRem();
 
-            if ("APPROVED".equalsIgnoreCase(request.getRem()) || "REJECTED".equalsIgnoreCase(request.getRem())) {
-                status.setRemarks(request.getRem().toUpperCase());
+            if ("APPROVED".equalsIgnoreCase(newStatus) || "REJECTED".equalsIgnoreCase(newStatus)) {
+                // ✅ Update both status and remarks
+                status.setStatus(newStatus.toUpperCase());
+                status.setRemarks(remarks);
                 statusRepository.save(status);
+
                 if ("APPROVED".equalsIgnoreCase(request.getRem())){
                     HR hr = new HR();
                     hr.setEmployee_id(request.getEmpId());

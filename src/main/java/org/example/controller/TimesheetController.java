@@ -66,14 +66,17 @@ public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO
         List<Status> statuses = statusRepository.findByEmpIdAndWeekIn(empId, weeks);
 
         Map<String, String> result = new HashMap<>();
-        result.put("previous", null);
-        result.put("current", null);
+        result.put("previous", "NOT_SUBMITTED");
+        result.put("current", "NOT_SUBMITTED");
 
         for (Status status : statuses) {
-            if (status.getWeek().equals(weeks.get(0))) {
-                result.put("previous", status.getStatus());
-            } else if (status.getWeek().equals(weeks.get(1))) {
-                result.put("current", status.getStatus());
+            String week = status.getWeek();
+            String stat = (status.getStatus() != null) ? status.getStatus().toUpperCase() : "NOT_SUBMITTED";
+
+            if (week.equals(weeks.get(0))) {
+                result.put("previous", stat);
+            } else if (week.equals(weeks.get(1))) {
+                result.put("current", stat);
             }
         }
 

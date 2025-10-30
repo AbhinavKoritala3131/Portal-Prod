@@ -14,8 +14,10 @@ public interface StatusRepository extends JpaRepository<Status, Long>{
 
     Optional<Status> findByEmpIdAndWeek(Long empId, String week);
     List<Status> findByEmpIdAndWeekIn(Long empId, List<String> weeks);
-    @Query("SELECT s.empId FROM Status s WHERE s.week = :week AND s.remarks IS NULL")
-    List<Long> findEmpIdsByWeekWithNullRemarks(@Param("week") String week);    List<Status> findByWeekAndRemarksIsNull(String week);
+    @Query("SELECT s.empId FROM Status s WHERE s.week = :week AND UPPER(s.status) = 'SUBMITTED'")
+    List<Long> findEmpIdsByWeekWithSubmittedStatus(@Param("week") String week);
+
+    List<Status> findByWeekAndStatusIgnoreCase(String week, String status);
 
 
 

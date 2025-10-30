@@ -3,7 +3,16 @@ package org.example.dto;
 public class ApprovalStatusDTO {
     private Long empId;
     private String week;
+    private String status;
     private String rem;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public Long getEmpId() {
         return empId;
