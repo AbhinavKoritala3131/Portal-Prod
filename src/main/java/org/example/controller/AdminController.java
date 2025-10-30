@@ -92,8 +92,7 @@ public class AdminController {
                 status.setRemarks(remarks);
                 statusRepository.save(status);
 
-                if ("APPROVED".equalsIgnoreCase(request.getRem())){
-                    HR hr = new HR();
+                if ("APPROVED".equalsIgnoreCase(newStatus)) {                    HR hr = new HR();
                     hr.setEmployee_id(request.getEmpId());
                     hr.setWeek(request.getWeek());
                     hr.setHours(status.getTotal());
