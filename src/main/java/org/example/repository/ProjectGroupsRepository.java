@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface ProjectGroupsRepository extends JpaRepository<ProjectGroups, Long> {
     List<ProjectGroups> findByEmpId(Long empId);
+    List<ProjectGroups> findByProjectType(String type);
+    ProjectGroups findByProjectTypeAndEmpId(String type, Long empId);
 
 }

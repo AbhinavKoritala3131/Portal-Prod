@@ -14,9 +14,11 @@ public class HR {
     private String name;
     private String email;
     private String ssn;
-    private String Week;
+    private String week;
+
     private int hours;
-    private String payroll;
+    private String worked;
+
 
     public void setS_no(Long s_no) {
         this.s_no = s_no;
@@ -56,11 +58,14 @@ public class HR {
     }
 
     public String getWeek() {
-        return Week;
+        return week;
+
     }
 
     public void setWeek(String week) {
-        Week = week;
+        this.week = week;
+
+
     }
 
     public int getHours() {
@@ -71,11 +76,11 @@ public class HR {
         this.hours = hours;
     }
 
-    public String getPayroll() {
-        return payroll;
+    public String getWorked() {
+        return worked;
     }
 
-    public void setPayroll(String payroll) {
-        this.payroll = payroll;
+    public void setWorked(String worked) {
+        this.worked = worked;
     }
 }

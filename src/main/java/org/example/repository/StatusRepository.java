@@ -18,6 +18,8 @@ public interface StatusRepository extends JpaRepository<Status, Long>{
     List<Long> findEmpIdsByWeekWithSubmittedStatus(@Param("week") String week);
 
     List<Status> findByWeekAndStatusIgnoreCase(String week, String status);
+    List<Status> findByWeek(String week);
+
 
 
 

@@ -17,6 +17,15 @@ public class Status {
     private int total; // total hours in the week
     private String status; // e.g., "Submitted"
     private String remarks;
+    private String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     public String getRemarks() {
         return remarks;

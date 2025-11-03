@@ -6,10 +6,7 @@ import org.example.dto.TimesheetDTO;
 import org.example.dto.TimesheetDTOEntries;
 import org.example.entity.*;
 import org.example.exception.UserNotFound;
-import org.example.repository.ClockRepository;
-import org.example.repository.StatusRepository;
-import org.example.repository.TimesheetRepository;
-import org.example.repository.UserStatusRepository;
+import org.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,6 +30,8 @@ public class TimesheetService {
     private StatusRepository statusRepository;
     @Autowired
     private UserStatusRepository userStatusRepository;
+    @Autowired
+    private ProjectsListRepository projectsListRepository;
 
     //SUBMIT TIMESHEET RECORDS
     @Transactional
@@ -42,11 +41,24 @@ public class TimesheetService {
         List<TimesheetDTOEntries> entries = submissionDTO.getEntries();
 
         entries.forEach(entryDTO -> {
-            Timesheet timesheet = new Timesheet();
-            timesheet.setEmpId(entryDTO.getUserId());
+            // 🔍 Find existing entry for same emp & date
+            Optional<Timesheet> existingOpt =
+                    timesheetRepository.findByEmpIdAndDate(entryDTO.getUserId(), entryDTO.getDate());
+
+            Timesheet timesheet;
+            if (existingOpt.isPresent()) {
+                // ✅ Update existing record
+                timesheet = existingOpt.get();
+            } else {
+                // ✅ Create new record if not exists
+                timesheet = new Timesheet();
+                timesheet.setEmpId(entryDTO.getUserId());
+                timesheet.setDate(entryDTO.getDate());
+            }
+
+            // Common field updates
             timesheet.setStart(entryDTO.getStart());
             timesheet.setEnd_time(entryDTO.getEnd());
-            timesheet.setDate(entryDTO.getDate());
             timesheet.setWeek(entryDTO.getWeek());
             timesheet.setTotal(entryDTO.getTotal());
             timesheet.setProject(entryDTO.getProject());
@@ -62,6 +74,13 @@ public class TimesheetService {
         status.setWeek(submissionDTO.getWeek());
         status.setTotal(submissionDTO.getWeekTotal());
         status.setStatus("SUBMITTED");
+        String proj =entries.get(0).getProject();
+        if(!"N/A".equals(proj)) {
+            ProjectsList work = projectsListRepository.findByProjectName(entries.get(0).getProject());
+            status.setNote(work.getProjectDescription());
+        }else{
+            status.setNote("Not Applicable");
+        }
 
         statusRepository.save(status);
     }

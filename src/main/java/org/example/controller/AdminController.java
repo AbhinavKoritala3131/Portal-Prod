@@ -2,14 +2,8 @@ package org.example.controller;
 
 
 import org.example.dto.ApprovalStatusDTO;
-import org.example.entity.HR;
-import org.example.entity.Status;
-import org.example.entity.Timesheet;
-import org.example.entity.User;
-import org.example.repository.HRRepository;
-import org.example.repository.StatusRepository;
-import org.example.repository.TimesheetRepository;
-import org.example.repository.UserRepository;
+import org.example.entity.*;
+import org.example.repository.*;
 import org.example.security.SSNEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "${FRONTEND_URL:http://localhost:5173}")
@@ -34,6 +27,8 @@ public class AdminController {
     private UserRepository userRepository;
     @Autowired
     private HRRepository hrRepository;
+    @Autowired
+    private UserStatusRepository userStatusRepository;
 
 
     @GetMapping("/timesheets-by-week")
@@ -92,7 +87,8 @@ public class AdminController {
                 status.setRemarks(remarks);
                 statusRepository.save(status);
 
-                if ("APPROVED".equalsIgnoreCase(newStatus)) {                    HR hr = new HR();
+                if ("APPROVED".equalsIgnoreCase(newStatus)) {
+                    HR hr = new HR();
                     hr.setEmployee_id(request.getEmpId());
                     hr.setWeek(request.getWeek());
                     hr.setHours(status.getTotal());
@@ -102,12 +98,16 @@ public class AdminController {
                         hr.setEmail(user.getUsername());
                         try {
                             String decryptedSsn = SSNEncryptor.decrypt(user.getSsn());
-                            hr.setSsn(decryptedSsn);
+                            hr.setSsn("XXXX-"+decryptedSsn.substring(5, 9));
+
                         } catch (Exception e) {
                             throw new RuntimeException("Problem decrypting SSN");
                         }
                         hr.setName(user.getName());
                         hr.setEmail(user.getUsername());
+                        hr.setWorked(statusOpt.get().getNote());
+
+
                         hrRepository.save(hr);
                     }
                 }else{
@@ -174,6 +174,68 @@ public class AdminController {
         return ResponseEntity.ok("Timesheet updates and status total adjusted successfully.");
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/trackStatus")
+    public ResponseEntity<List<Map<String, Object>>> trackStatus(@RequestParam String week) {
+        // Find all status entries for that week
+        List<Status> statusList = statusRepository.findByWeek(week);
+
+        if (statusList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        // Prepare the response list
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Status s : statusList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", s.getEmpId());
+            map.put("status", s.getStatus());
+
+            // 🔹 Get employee name from users table (assuming you have a UserRepository)
+            userRepository.findById(s.getEmpId()).ifPresentOrElse(user -> {
+                map.put("name", user.getFname()+" "+user.getLname()  );
+            }, () -> {
+                map.put("name", "Unknown");
+            });
+
+            response.add(map);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/userStatus")
+    public ResponseEntity<List<Map<String, Object>>> getUserStatus(
+            @RequestParam(required = false) String filterStatus) { // optional filter
+
+        List<UserStatus> statuses;
+
+        if ("ONLINE".equalsIgnoreCase(filterStatus)) {
+            statuses = userStatusRepository.findByStatus("CLOCK_IN");
+        } else if ("OFFLINE".equalsIgnoreCase(filterStatus)) {
+            statuses = userStatusRepository.findByStatus("CLOCK_OUT");
+        } else {
+            statuses = userStatusRepository.findAll();
+        }
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (UserStatus s : statuses) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", s.getUser().getId());
+            map.put("name", s.getUser().getFname() + " " + s.getUser().getLname());
+            String mod_status= ("CLOCK_IN".equalsIgnoreCase(s.getStatus()) ? "ONLINE" : "OFFLINE");
+            map.put("status", mod_status); // FRONTEND maps CLOCK_IN/CLOCK_OUT to dot
+            response.add(map);
+        }
+
+        if (response.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(response);
+    }
 
 
 
