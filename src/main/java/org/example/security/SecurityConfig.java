@@ -37,6 +37,11 @@ public class SecurityConfig {
                         .requestMatchers("/users/register","/users/login","/health").permitAll()
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).hasRole("ADMIN")
 
                         .anyRequest().authenticated())
 //                .requiresChannel(channel -> channel.anyRequest().requiresSecure()) // HTTPS enforcement (not in DEV)
