@@ -23,16 +23,17 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-                    environment {
-                        SONAR_TOKEN = credentials('sonarqube-token') // ID of your credential
-                    }
-                    steps {
-                        withSonarQubeEnv('VectrollaSonar') { // Name of SonarQube server in Jenkins config
-                            bat "mvn sonar:sonar -Dsonar.projectKey=Vectrolla-sonar-project -Dsonar.login=${SONAR_TOKEN}"
-                        }
+ stage('SonarQube Analysis') {
+            steps {
+                echo "Running SonarQube analysis..."
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('VectrollaSonar') {
+                        // Use Windows environment variable syntax %SONAR_TOKEN%
+                        bat 'mvn sonar:sonar -Dsonar.projectKey=Vectrolla-sonar-project -Dsonar.login=%SONAR_TOKEN%'
                     }
                 }
+            }
+        }
 
         stage('Extract Version') {
             steps {
