@@ -29,7 +29,7 @@ pipeline {
                     }
                     steps {
                         withSonarQubeEnv('VectrollaSonar') { // Name of SonarQube server in Jenkins config
-                            sh "mvn sonar:sonar -Dsonar.projectKey=Vectrolla-sonar-project -Dsonar.login=${SONAR_TOKEN}"
+                            bat "mvn sonar:sonar -Dsonar.projectKey=Vectrolla-sonar-project -Dsonar.login=${SONAR_TOKEN}"
                         }
                     }
                 }
