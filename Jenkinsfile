@@ -23,6 +23,17 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+                    environment {
+                        SONAR_TOKEN = credentials('sonarqube-token') // ID of your credential
+                    }
+                    steps {
+                        withSonarQubeEnv('VectrollaSonar') { // Name of SonarQube server in Jenkins config
+                            sh "mvn sonar:sonar -Dsonar.projectKey=Vectrolla-sonar-project -Dsonar.login=${SONAR_TOKEN}"
+                        }
+                    }
+                }
+
         stage('Extract Version') {
             steps {
                 echo "Extracting version from pom.xml..."
