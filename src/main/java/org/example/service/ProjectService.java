@@ -22,6 +22,7 @@ public class ProjectService {
         this.groupsRepo = groupsRepo;
     }
 
+    //    USERS VIEW ALL THE PROJECTS ASSIGNED TO THEM BY THEIR EMPID
     public List<ProjectsList> getProjectsByEmpId(Long empId) {
         // Step 1: get project types for the employee
         List<ProjectGroups> groups = groupsRepo.findByEmpId(empId);
@@ -36,37 +37,23 @@ public class ProjectService {
 
     }
 
-
-
-
-    public List<String> NamesReturn(Long empId) {
-        List<ProjectGroups> pg=groupsRepo.findByEmpId(empId);
-
-        List<String> projectTypes = pg.stream()
-                .map(ProjectGroups::getProjectType)
-                .distinct() // avoid duplicates
-                .collect(Collectors.toList());
-        List<ProjectsList> names=projectsRepo.findByProjectTypeIn(projectTypes);
-
-        return names.stream()
-                .map(ProjectsList::getProjectName)
-                .distinct() // avoid duplicates
-                .collect(Collectors.toList());
-    }
-
+//  ✅ Get all projects TO LIST IN ASSIGN PROJECTS COMPONENT
     public List<ProjectsList> getAllProjects() {
         return projectsRepo.findAll();
     }
 
+    // ✅ Add NEW project
     public ProjectsList addProject(ProjectsList project) {
         return projectsRepo.save(project);
     }
 
+    // ✅ Delete SINGLE project by name
     public void deleteProjectByName(String name) {
         ProjectsList p = projectsRepo.findByProjectName(name);
         if (p != null) projectsRepo.delete(p);
     }
 
+    // ✅ Delete group by project type[GROUP NAME]
     public void deleteGroup(String type) {
         List<ProjectsList> projects = projectsRepo.findByProjectType(type);
         projectsRepo.deleteAll(projects);
@@ -74,20 +61,23 @@ public class ProjectService {
         groupsRepo.deleteAll(users);
     }
 
+    // Get users[EMPIDs] by project type/GROUP THEY ARE ASSIGNED TO LIST ALL BY GROUP
     public List<ProjectGroups> getUsersByType(String type) {
         return groupsRepo.findByProjectType(type);
     }
 
+    // Add users to project group/type
     public ProjectGroups addUserToType(ProjectGroups pg) {
         return groupsRepo.save(pg);
     }
 
+    // Remove users to project group/type
     public void removeUserFromType(String type, Long empId) {
         ProjectGroups pg = groupsRepo.findByProjectTypeAndEmpId(type, empId);
         if (pg != null) groupsRepo.delete(pg);
     }
 
-
+    // TO UPDATE EDITED PROJECT
     public boolean updateProject(String oldName, ProjectDTO dto) {
         ProjectsList project = projectsRepo.findByProjectName(oldName);
 

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HealthController {
 
+    //    THIS API IS FOR HEALTH CHECKING BY TARGET GROUP
     @GetMapping("/health")
     public ResponseEntity health() {
         return ResponseEntity.status(HttpStatus.OK).build();

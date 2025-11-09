@@ -49,7 +49,7 @@ public class UserService {
     @Autowired
     private UserStatusRepository userStatusRepository;
 
-
+//    TO REGISTER THE USER
     public ResponseEntity<String> register(User user) {
         AuthorizedUser au = authUsersRepo.getByUsername(user.getUsername().toLowerCase());
 
@@ -76,8 +76,11 @@ public class UserService {
 
     }
 
-    public ResponseEntity<Map<String,String>> login(LoginDTO l, HttpServletResponse response) {
-        try {
+//    THIS IS IN FUTURE FOR REFRESH TOKENS GENERATION
+//    public ResponseEntity<Map<String,String>> login(LoginDTO l, HttpServletResponse response) {
+
+    //    TO LOGIN THE USER
+    public ResponseEntity<Map<String,String>> login(LoginDTO l) {        try {
 
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(l.getUsername().toLowerCase(), l.getPassword()));
@@ -107,8 +110,7 @@ public class UserService {
     }
 
 
-
-
+    //    TO REQUEST USER DETAILS AFTER SUCCESSFULL LOGIN
 
     public ResponseEntity<?> getUserRole(String authHeader) {
         String token = authHeader.substring(7);
@@ -140,6 +142,8 @@ public class UserService {
 
     }
 
+
+    //    REMOVE USER FROM DB
     @Transactional
     public ResponseEntity<String> deleteUserFromDB(Long id, String username) {
         Optional<User> userOpt = (id != null)

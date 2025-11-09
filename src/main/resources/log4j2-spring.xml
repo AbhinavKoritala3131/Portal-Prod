@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console logs remain as-is -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{ISO8601} %-5level [%t] %c{1} - %msg%n"/>
+        </Console>
+
+        <!-- Splunk HTTP appender -->
+        <SplunkHttp
+                name="splunkhttp"
+                url="http://localhost:8088"
+                token="d22c5f4e-5d1d-40e2-828b-50f82ef896d9"
+                index="timesheet_service_dev"
+                source="my-vect-logs"
+                sourcetype="log4j"
+                batch_size="5">
+            <!-- Use EventJsonLayoutV1 for cleaner Splunk ingestion -->
+            <EventJsonLayoutV1/>
+        </SplunkHttp>
+
+    </Appenders>
+
+    <Loggers>
+        <!-- Root logger set to INFO -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="splunkhttp"/>
+        </Root>
+    </Loggers>
+</Configuration>

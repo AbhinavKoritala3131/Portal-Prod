@@ -18,19 +18,19 @@ public class ProjectGroupsController {
         this.projectService = projectService;
     }
 
-    // Get users by project type
+    // Get users[EMPIDs] by project type/GROUP THEY ARE ASSIGNED TO LIST ALL BY GROUP
     @GetMapping("/type/{type}")
     public List<ProjectGroups> getUsersByType(@PathVariable String type) {
         return projectService.getUsersByType(type);
     }
 
-    // Add user to project type
+    // Add users to project group
     @PostMapping
     public ProjectGroups addUser(@RequestBody ProjectGroups pg) {
         return projectService.addUserToType(pg);
     }
 
-    // Delete user from project type
+    // Remove users to project group/type
     @DeleteMapping("/{type}/{empId}")
     public void deleteUser(@PathVariable String type, @PathVariable Long empId) {
         projectService.removeUserFromType(type, empId);

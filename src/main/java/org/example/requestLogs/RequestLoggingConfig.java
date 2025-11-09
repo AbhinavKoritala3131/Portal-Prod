@@ -1,4 +1,4 @@
-package org.example.RequestLogs;
+package org.example.requestLogs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -19,7 +19,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building Spring Boot app with Maven..."
-                bat 'mvn clean package -DskipTests'
+                bat 'mvn clean verify -DskipITs=true'
             }
         }
 

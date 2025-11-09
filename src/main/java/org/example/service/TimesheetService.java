@@ -5,7 +5,8 @@ import org.example.dto.ClockDTO;
 import org.example.dto.TimesheetDTO;
 import org.example.dto.TimesheetDTOEntries;
 import org.example.entity.*;
-import org.example.exception.UserNotFound;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ import java.util.Optional;
 
 @Service
 public class TimesheetService {
+    Logger logger = LogManager.getLogger(TimesheetService.class);
+
+
     @Autowired
     private TimesheetRepository timesheetRepository;
     @Autowired
@@ -33,9 +37,11 @@ public class TimesheetService {
     @Autowired
     private ProjectsListRepository projectsListRepository;
 
-    //SUBMIT TIMESHEET RECORDS
+    // USERS SUBMIT TIMESHEET FOR THE WEEK
     @Transactional
     public void submitTimesheetWeek(TimesheetDTO submissionDTO) {
+
+        logger.info("Timesheet submission begin");
 
         // Save all timesheet entries for the week
         List<TimesheetDTOEntries> entries = submissionDTO.getEntries();
@@ -145,7 +151,8 @@ public class TimesheetService {
             userStatusRepository.save(st1);
         }
     }
-//TO SEND USER CLOCK STATUS TO REACT TO UPDATE CLOCK STATUS
+
+//TO SEND USER CLOCK STATUS TO RENDER AFTER LOGIN
      String userStat(Long id){
 
         Optional<UserStatus> st=userStatusRepository.findById(id);
@@ -157,13 +164,6 @@ public class TimesheetService {
         }
 
     }
-// SEND WEEK UPDATES TO USE
-public Optional<Status> showWeeks(Long id){
-        return statusRepository.findById(id);
-}
-
-
-
 
 
 

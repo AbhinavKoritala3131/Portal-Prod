@@ -30,7 +30,9 @@ public class TimesheetController {
     private TimesheetService  timesheetService;
     @Autowired
     private StatusRepository statusRepository;
-//SUBMIT FOR APPROVAL TIMESHEET
+
+
+    // USERS SUBMIT TIMESHEET FOR THE WEEK
 @PostMapping("/submit")
 public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO) {
     try {
@@ -53,7 +55,7 @@ public ResponseEntity<?> submitTimesheet(@RequestBody TimesheetDTO submissionDTO
 
 
 
-//    FETCH STATUS TO UPDATE THE SUBMITTED WEEKS
+    // FETCH STATUS TO RENDER ONLY UNSUBMITTED WEEKS FOR USER [CURRENT AND PREVIOUS WEEKS ONLY]
     @PostMapping("/status-check")
     public ResponseEntity<Map<String, String>> checkStatus(@RequestBody StatusCheckDTO request) {
         Long empId = request.getEmpId();

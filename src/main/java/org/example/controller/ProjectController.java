@@ -40,26 +40,25 @@ public class ProjectController {
 
     }
 
+    //    USERS VIEW ALL THE PROJECTS ASSIGNED TO THEM BY THEIR EMPID
     @GetMapping("/employee/{empId}")
     public List<ProjectsList> getEmployeeProjects(@PathVariable Long empId) {
         return projectService.getProjectsByEmpId(empId);
 
     }
 
+    // API ON HOLD
+//    @GetMapping("/employee/names/{empId}")
+//    public ResponseEntity<List<String>> ProjectNamesDisp(@PathVariable Long empId){
+//        List<String> projectNames =projectService.NamesReturn(empId);
+//        if (projectNames.isEmpty()) {
+//            return ResponseEntity.noContent().build(); // 204 No Content
+//        }
+//
+//        return ResponseEntity.ok(projectNames);
+//    }
 
-
-    @GetMapping("/employee/names/{empId}")
-    public ResponseEntity<List<String>> ProjectNamesDisp(@PathVariable Long empId){
-        List<String> projectNames =projectService.NamesReturn(empId);
-
-        if (projectNames.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        }
-
-        return ResponseEntity.ok(projectNames);
-    }
-
-    // ✅ Get all projects
+    // ✅ Get all projects TO LIST IN ASSIGN PROJECTS COMPONENT
     @GetMapping("/listAll")
     public List<ProjectDTO> listAll() {
         return projectService.getAllProjects()
@@ -67,31 +66,32 @@ public class ProjectController {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Add project
+    // ✅ Add NEW project
     @PostMapping
     public ProjectDTO addProject(@RequestBody ProjectsList project) {
         ProjectsList saved = projectService.addProject(project);
         return new ProjectDTO(saved);
     }
 
-    // Get all users/employees
+    // Get all users/employees TO LOAD TO ASSIGN ANY NEW/EXISTING PROJECTS
     @GetMapping("/employees")
     public List<User> getAllEmployees() {
         return userRepository.findAll();
     }
 
-    // ✅ Delete project by name
+    // ✅ Delete SINGLE project by name
     @DeleteMapping("/name/{name}")
     public void deleteProject(@PathVariable String name) {
         projectService.deleteProjectByName(name);
     }
 
-    // ✅ Delete group by project type
+    // ✅ Delete group by project type[GROUP NAME]
     @DeleteMapping("/type/{type}")
     public void deleteGroup(@PathVariable String type) {
         projectService.deleteGroup(type);
     }
 
+    //    GET ALL THE PROJECT GROUPS/TYPES TO LOAD IN THE ASSIGNING PROJECT COMPONENT
     @GetMapping("/types")
     public List<String> getProjectTypes() {
         // Types from projects
@@ -113,7 +113,7 @@ public class ProjectController {
                 .collect(Collectors.toList());
     }
 
-    // Update project by name
+    // TO UPDATE EDITED PROJECT
     @PutMapping("/name/{projectName}")
     public ResponseEntity<?> updateProject(
             @PathVariable String projectName,
