@@ -37,6 +37,21 @@ public class ProjectService {
 
     }
 
+    // Retrieve all projects to display in Timesheet list
+    public List<String> NamesReturn(Long empId) {
+        List<ProjectGroups> pg=groupsRepo.findByEmpId(empId);
+        List<String> projectTypes = pg.stream()
+                .map(ProjectGroups::getProjectType)
+                .distinct() // avoid duplicates
+                .collect(Collectors.toList());
+        List<ProjectsList> names=projectsRepo.findByProjectTypeIn(projectTypes);
+        return names.stream()
+                .map(ProjectsList::getProjectName)
+                .distinct() // avoid duplicates
+                .collect(Collectors.toList());
+    }
+
+
 //  ✅ Get all projects TO LIST IN ASSIGN PROJECTS COMPONENT
     public List<ProjectsList> getAllProjects() {
         return projectsRepo.findAll();

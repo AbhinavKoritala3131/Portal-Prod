@@ -47,16 +47,16 @@ public class ProjectController {
 
     }
 
-    // API ON HOLD
-//    @GetMapping("/employee/names/{empId}")
-//    public ResponseEntity<List<String>> ProjectNamesDisp(@PathVariable Long empId){
-//        List<String> projectNames =projectService.NamesReturn(empId);
-//        if (projectNames.isEmpty()) {
-//            return ResponseEntity.noContent().build(); // 204 No Content
-//        }
-//
-//        return ResponseEntity.ok(projectNames);
-//    }
+    // Retrieve all projects to display in Timesheet list
+    @GetMapping("/employee/names/{empId}")
+    public ResponseEntity<List<String>> ProjectNamesDisp(@PathVariable Long empId){
+        List<String> projectNames =projectService.NamesReturn(empId);
+        if (projectNames.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+
+        return ResponseEntity.ok(projectNames);
+    }
 
     // ✅ Get all projects TO LIST IN ASSIGN PROJECTS COMPONENT
     @GetMapping("/listAll")
